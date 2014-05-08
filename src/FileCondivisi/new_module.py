@@ -5,5 +5,5 @@
 __author__="luca"
 __date__ ="$8-mag-2014 12.37.30$"
 
-if __name__ == "__main__":
+if __name__ ==47145 "__main__":
     print "Hello W5465orld"
