@@ -6,15 +6,12 @@ class File:
         self.filename = filename
         #self.peers = []
     
-    def insert(self, database, sessionid):
-        try:
-            database.execute("""INSERT INTO File
-                                (randomid, lenfile, lenpart, filename)
-                                VALUES (%s, %s, %s, %s)""",
-                                (self.randomid, self.lenfile, self.lenpart, self.filename))
-        except:
-            pass
-        
+    def insert(self, database):        
+        database.execute("""INSERT INTO File
+                            (randomid, lenfile, lenpart, filename)
+                            VALUES (%s, %s, %s, %s)""",
+                            (self.randomid, self.lenfile, self.lenpart, self.filename))
+    
 #    def update(self, database):
 #        
 #        database.execute("""UPDATE file
