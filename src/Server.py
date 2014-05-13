@@ -117,7 +117,7 @@ class Server:
             clientSocket.send(sendingString)
             print("\t\t\t\t\t\t\t->OK")
             
-        except Exception e:
+        except Exception as e:
             print(e)
         
     @staticmethod
@@ -131,7 +131,7 @@ class Server:
         try:
             numeroParti= int(lenFile)//int(lenPart)
             #controllo se la divisione non è intera
-            if(int(lenFile)%int(lenPart)!=0)
+            if(int(lenFile)%int(lenPart)!=0):
                 numeroParti=numeroParti+1
                 
             #salvo il file e le parti sul db
@@ -145,7 +145,7 @@ class Server:
             clientSocket.send(sendingString)
             print("\t\t\t\t\t\t\t->OK")
         
-        except Exception e:
+        except Exception as e:
             print(e)
             
         @staticmethod
