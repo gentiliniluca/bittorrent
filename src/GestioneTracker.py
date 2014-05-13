@@ -38,7 +38,14 @@ class GestioneTracker:
                     #logout         
                     if operazione.upper() == "LOGO":
                         Server.Server.logoutHandler(receivedString, clientSocket)                   
-
+                    
+                    #addfile         
+                    if operazione.upper() == "ADDR":
+                        Server.Server.addFileHandler(receivedString, clientSocket) 
+                    
+                    #ricerca parte 1 LOOK
+                    if operazione.upper() == "LOOK":
+                        Server.Server.fileSearchHandler(receivedString, clientSocket) 
   
 
                   

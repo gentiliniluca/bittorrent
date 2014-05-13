@@ -1,4 +1,3 @@
-import Connessione
 
 import os
 import socket
@@ -7,6 +6,13 @@ import string
 import sys
 import random
 import time
+import Connessione
+import PartService
+import Part
+import PeerService
+import Peer
+import File
+import FileService
 
 from signal import signal, SIGPIPE, SIG_DFL
 from os.path import stat
@@ -55,7 +61,7 @@ class Server:
 
         #operazione di inserimento nel db del nuovo peer registrato attenzione all'istruzione che è commentata
         conn_db = Connessione.Connessione()
-        #peer = PeerService.PeerService.insertNewPeer(conn_db.crea_cursore(), ipp2p, pp2p)
+        peer = PeerService.PeerService.insertNewPeer(conn_db.crea_cursore(), ipp2p, pp2p)
         conn_db.esegui_commit()
         conn_db.chiudi_connessione()
         sessionID = peer.sessionid
@@ -67,4 +73,87 @@ class Server:
     
     @staticmethod
     def logoutHandler(receivedString, clientSocket):
+        sessionID = receivedString[4:20]
+        logout=TRUE
         
+        print("\t\t\t\t\t\t\tOperazione LogOut. SessionID: " + sessionID)
+        
+        try:
+            conn_db = Connessione.Connessione()
+            parts=[]
+            parts = PartService.PartService.getParts(conn_db.crea_cursore(), sessionID)
+            conn_db.esegui_commit()
+            conn_db.chiudi_connessione()    
+
+            #ciclo per controllare se tutte le parti sono condivise
+            i=0
+            while(i<len(parts)):
+                conn_db = Connessione.Connessione()
+                count = int(PartService.PartService.getPartCount(conn_db.crea_cursore(), parts[i].File_randomid,parts[i].partid))
+                conn_db.esegui_commit()
+                conn_db.chiudi_connessione()
+
+                if(conut<=1):
+                    logout=FALSE
+                    break
+                i=i+1    
+
+
+            if logout==TRUE:
+                sendingString = "ALOG"+Util.Util.adattaStringa(10,str(len(parts)))
+
+                #eliminazione delle parti e del peer dal db, viene fatta una volta che siamo sicuri che sia possibile il logout 
+                conn_db = Connessione.Connessione()
+                PartService.PartService.deleteParts(conn_db.crea_cursore(),sessionID)#elimino parti
+                peer = PeerService.PeerService.getPeer(conn_db.crea_cursore(), sessionID)#elimino il peer
+                peer.delete(conn_db.crea_cursore())
+                conn_db.esegui_commit()
+                conn_db.chiudi_connessione()    
+
+            else:
+                sendingString="NLOG"+Util.Util.adattaStringa(10,str(len(parts)))
+
+            print("\t\t\t\t\t\t\t->Restituisco: " + sendingString)
+            clientSocket.send(sendingString)
+            print("\t\t\t\t\t\t\t->OK")
+            
+        except Exception e:
+            print(e)
+        
+    @staticmethod
+    def addFileHandler(receivedString, clientSocket):
+        sessionID=receivedString[4:20]
+        randomID=receivedString[20:36]
+        lenFile=receivedString[36:46]
+        lenPart=receivedString[46:52]
+        fileName=receivedString[52:152]
+       
+        try:
+            numeroParti= int(lenFile)//int(lenPart)
+            #controllo se la divisione non è intera
+            if(int(lenFile)%int(lenPart)!=0)
+                numeroParti=numeroParti+1
+                
+            #salvo il file e le parti sul db
+            conn_db = Connessione.Connessione()
+            Fileservice.FileService.insertNewFile(conn_db.crea_cursore(),sessionID,randomID,lenFile,lenPart,fileName)
+            conn_db.esegui_commit()
+            conn_db.chiudi_connessione()
+            
+            sendingString="AADR"+Util.Util.adattaStringa(8,str(numeroParti))
+            print("\t\t\t\t\t\t\t->Restituisco: " + sendingString)
+            clientSocket.send(sendingString)
+            print("\t\t\t\t\t\t\t->OK")
+        
+        except Exception e:
+            print(e)
+            
+        @staticmethod
+        def fileSearchHandler(receivedString, clientSocket):
+            sessionID=receivedString[4:20]
+            fileName=receivedString[20:40]
+            
+            fileNamePulito=Util.Util.elimina_spazi_iniziali_finali(fileName)
+            fileNamePulito=Util.Util.elimina_asterischi_iniziali_finali(fileNamePulito)
+            
+            #continua con aggiunta file
