@@ -9,7 +9,9 @@ class FileService:
         file = File.File(randomid, lenfile, lenpart, filename)            
         file.insert(database) 
         
-        npart = lenfile // lenpart + 1
+        npart = lenfile // lenpart
+        if lenfile % lenpart != 0:
+            npart = npart + 1
         
         i = 0
         while i < npart:
