@@ -59,9 +59,9 @@ class Server:
         pp2p = receivedString[43:48]
         print("\t\t\t\t\t\t\tOperazione Login. Ip: " + ipp2p + ", Porta: " + pp2p)
 
-        #operazione di inserimento nel db del nuovo peer registrato attenzione all'istruzione che è commentata
-        conn_db = Connessione.Connessione()
-        peer = PeerService.PeerService.insertNewPeer(conn_db.crea_cursore(), ipp2p, pp2p)
+#       operazione di inserimento nel db del nuovo peer registrato attenzione all'istruzione che e' commentata
+        conn_db=Connessione.Connessione()
+        peer=PeerService.PeerService.insertNewPeer(conn_db.crea_cursore(), ipp2p, pp2p)
         conn_db.esegui_commit()
         conn_db.chiudi_connessione()
         sessionID = peer.sessionid
@@ -129,13 +129,13 @@ class Server:
         fileName=receivedString[52:152]
        
         try:
-            numeroParti= int(lenFile)//int(lenPart)
-            #controllo se la divisione non è intera
+            numeroParti=int(lenFile) // int(lenPart)
+            #controllo se la divisione non e' intera
             if(int(lenFile)%int(lenPart)!=0):
                 numeroParti=numeroParti+1
                 
             #salvo il file e le parti sul db
-            conn_db = Connessione.Connessione()
+            conn_db=Connessione.Connessione()
             Fileservice.FileService.insertNewFile(conn_db.crea_cursore(),sessionID,randomID,lenFile,lenPart,fileName)
             conn_db.esegui_commit()
             conn_db.chiudi_connessione()
