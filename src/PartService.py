@@ -56,4 +56,4 @@ class PartService:
     def deleteParts(database, sessionid):
         database.execute("""DELETE FROM Part
                             WHERE Peer_sessionid = %s""",
-                            (self.Peer_sessionid))  
+                            (sessionid))  
