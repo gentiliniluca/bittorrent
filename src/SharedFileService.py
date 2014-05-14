@@ -5,7 +5,7 @@ import random
 class SharedFileService:
     
     @staticmethod
-    def insertNewSharedFile(database, filename, lenfile, partnum, lenpart):
+    def insertNewSharedFile(database, filename, lenfile, lenpart):
         
         #generazione randomid
         randomid = "".join(random.choice(string.ascii_uppercase + string.digits) for _ in range(16))
@@ -23,7 +23,7 @@ class SharedFileService:
                                 (randomid))
         
         #inserimento nuovo sharedFile
-        sharedFile = SharedFile.SharedFile(randomid, filename, lenfile, partnum, lenpart)
+        sharedFile = SharedFile.SharedFile(randomid, filename, lenfile, lenpart)
         sharedFile.insert(database)
         
         return sharedFile
@@ -31,28 +31,28 @@ class SharedFileService:
     @staticmethod
     def getSharedFile(database, filename):
         
-        database.execute("""SELECT randomid, filename, lenfile, partnum, lenpart
+        database.execute("""SELECT randomid, filename, lenfile, lenpart
                             FROM SharedFile
                             WHERE filename = %s""",
                             (filename))
         
-        randomid, filename, lenfile, partnum, lenpart = database.fetchone()
+        randomid, filename, lenfile, lenpart = database.fetchone()
         
-        sharedFile = SharedFile.SharedFile(randomid, filename, lenfile, partnum, lenpart)
+        sharedFile = SharedFile.SharedFile(randomid, filename, lenfile, lenpart)
         
         return sharedFile
     
     @staticmethod
     def getSharedFileRandomId(database, randomid):
         
-        database.execute("""SELECT randomid, filename, lenfile, partnum, lenpart
+        database.execute("""SELECT randomid, filename, lenfile, lenpart
                             FROM SharedFile
                             WHERE randomid = %s""",
                             (randomid))
         
-        randomid, filename, lenfile, partnum, lenpart = database.fetchone()
+        randomid, filename, lenfile, lenpart = database.fetchone()
         
-        sharedFile = SharedFile.SharedFile(randomid, filename, lenfile, partnum, lenpart)
+        sharedFile = SharedFile.SharedFile(randomid, filename, lenfile, lenpart)
         
         return sharedFile
     
