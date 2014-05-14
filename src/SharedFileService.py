@@ -31,52 +31,52 @@ class SharedFileService:
     @staticmethod
     def getSharedFile(database, filename):
         
-        database.execute("""SELECT idsharedfile, filemd5, filename
-                            FROM sharedfile
+        database.execute("""SELECT randomid, filename, lenfile, partnum, lenpart
+                            FROM SharedFile
                             WHERE filename = %s""",
                             (filename))
         
-        idsharedfile, filemd5, filename = database.fetchone()
+        randomid, filename, lenfile, partnum, lenpart = database.fetchone()
         
-        sharedFile = SharedFile.SharedFile(idsharedfile, filemd5, filename)
-        
-        return sharedFile
-    
-    @staticmethod
-    def getSharedFileMD5(database, filemd5):
-        
-        database.execute("""SELECT idsharedfile, filemd5, filename
-                            FROM sharedfile
-                            WHERE filemd5 = %s""",
-                            (filemd5))
-        
-        idsharedfile, filemd5, filename = database.fetchone()
-        
-        sharedFile = SharedFile.SharedFile(idsharedfile, filemd5, filename)
+        sharedFile = SharedFile.SharedFile(randomid, filename, lenfile, partnum, lenpart)
         
         return sharedFile
     
     @staticmethod
-    def getSharedFiles(database, searchString):
+    def getSharedFileRandomId(database, randomid):
         
-        searchString = "%" + searchString.upper() + "%"
+        database.execute("""SELECT randomid, filename, lenfile, partnum, lenpart
+                            FROM SharedFile
+                            WHERE randomid = %s""",
+                            (randomid))
         
-        database.execute("""SELECT idsharedfile, filemd5, filename
-                            FROM sharedfile
-                            WHERE filename LIKE %s""",
-                            searchString)
+        randomid, filename, lenfile, partnum, lenpart = database.fetchone()
         
-        sharedFiles = []
+        sharedFile = SharedFile.SharedFile(randomid, filename, lenfile, partnum, lenpart)
         
-        try:
-            while True:
-                idsharedfile, filemd5, filename = database.fetchone()
-                sharedFile = SharedFile.SharedFile(idsharedfile, filemd5, filename)
-                sharedFiles.append(sharedFile)
-        except:
-            pass
-        
-        return sharedFiles
+        return sharedFile
+    
+#    @staticmethod
+#    def getSharedFiles(database, searchString):
+#        
+#        searchString = "%" + searchString.upper() + "%"
+#        
+#        database.execute("""SELECT idsharedfile, filemd5, filename
+#                            FROM sharedfile
+#                            WHERE filename LIKE %s""",
+#                            searchString)
+#        
+#        sharedFiles = []
+#        
+#        try:
+#            while True:
+#                idsharedfile, filemd5, filename = database.fetchone()
+#                sharedFile = SharedFile.SharedFile(idsharedfile, filemd5, filename)
+#                sharedFiles.append(sharedFile)
+#        except:
+#            pass
+#        
+#        return sharedFiles
     
     @staticmethod
     def delete(database):
