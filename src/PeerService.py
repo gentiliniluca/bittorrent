@@ -19,6 +19,29 @@ class PeerService:
         return peer
     
     @staticmethod
+    def getPeersfromFile(database, randomid):
+        database.execute("""SELECT DISTINCT sessionid,ipp2p, pp2p
+                            FROM Peer,Part,File
+                            WHERE randomid LIKE %s
+                            AND Peer.sessionid=Part.Peer_sessionid 
+                            AND File.randomid=Part.File_randomid
+                            ORDER BY randomid""",
+                            randomid)        
+        
+        try:            
+            peers = []         
+            
+            while True:            
+                sessionid,ipp2p, pp2p = database.fetchone()       
+                peers.append(Peer.Peer(sessionid, ipp2p, pp2p))     
+                                
+        except:
+            pass            
+            
+        return peers
+    
+    
+    @staticmethod
     def getCountFile(database, sessionid):
         
         database.execute("""SELECT count(*)
