@@ -127,7 +127,10 @@ class Server:
         lenFile=receivedString[36:46]
         lenPart=receivedString[46:52]
         fileName=receivedString[52:152]
-       
+        
+        fileNamePulito=Util.Util.elimina_spazi_iniziali_finali(fileName)
+        fileNamePulito=Util.Util.elimina_asterischi_iniziali_finali(fileNamePulito)
+        
         try:
             numeroParti=int(lenFile) // int(lenPart)
             #controllo se la divisione non e' intera
@@ -136,7 +139,7 @@ class Server:
                 
             #salvo il file e le parti sul db
             conn_db=Connessione.Connessione()
-            Fileservice.FileService.insertNewFile(conn_db.crea_cursore(),sessionID,randomID,lenFile,lenPart,fileName)
+            Fileservice.FileService.insertNewFile(conn_db.crea_cursore(),sessionID,randomID,lenFile,lenPart,fileNamePulito)
             conn_db.esegui_commit()
             conn_db.chiudi_connessione()
             
