@@ -11,7 +11,7 @@ class Peer:
         
         #check di unicita' peer
         database.execute("""SELECT *
-                            FROM peer
+                            FROM Peer
                             WHERE ipp2p = %s AND pp2p = %s""",
                             (self.ipp2p, self.pp2p))
         
