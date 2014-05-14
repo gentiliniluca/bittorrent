@@ -46,7 +46,10 @@ class GestioneTracker:
                     #ricerca parte 1 LOOK
                     if operazione.upper() == "LOOK":
                         Server.Server.fileSearchHandler(receivedString, clientSocket) 
-  
+                        
+                    #ricerca parte 2 FCHU
+                    if operazione.upper() == "FCHU":
+                        Server.Server.fileSearchHandlerPartList(receivedString, clientSocket)
 
                   
 

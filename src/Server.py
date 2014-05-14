@@ -154,9 +154,31 @@ class Server:
         @staticmethod
         def fileSearchHandler(receivedString, clientSocket):
             sessionID=receivedString[4:20]
-            fileName=receivedString[20:40]
+            searchString=receivedString[20:40]
             
-            fileNamePulito=Util.Util.elimina_spazi_iniziali_finali(fileName)
-            fileNamePulito=Util.Util.elimina_asterischi_iniziali_finali(fileNamePulito)
+            searchStringClear=Util.Util.elimina_spazi_iniziali_finali(searchString)
+            searchStringClear=Util.Util.elimina_asterischi_iniziali_finali(searchStringClear)
             
-            #continua con aggiunta file
+            try:
+                conn_db=Connessione.Connessione()
+                #vettore dei file ottenuti dalla ricerca facendo match con la stringa
+                files=[]
+                files=FileService.FileService.getFiles(conn_db.crea_cursore(),searchStringClear)
+                conn_db.esegui_commit()
+                conn_db.chiudi_connessione()
+                
+                sendingString="ALOO"+Util.Util.adattaStringa(3,str(len(files)))
+                
+                i=0
+                while(i<len(files)):
+                    sendingString=sendingString+file[i].randomid+Util.Util.aggiungi_spazi_finali(file[i].filename,100)
+                    sendingString=sendingString+files[i].lenfile+files[i].lenpart
+                    i=i+1
+                print("\t\t\t\t\t\t\t->Restituisco: " + sendingString)
+                clientSocket.send(sendingString)
+                print("\t\t\t\t\t\t\t->OK")
+            
+            except Exception as e:
+                print(e)
+                
+            
