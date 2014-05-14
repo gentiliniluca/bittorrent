@@ -9,6 +9,20 @@ class PartService:
         part = Part.Part(sessionid, randomid, partid)            
         part.insert(database) 
         return part       
+   
+    @staticmethod
+    def getPart(database, sessionid,randomid,partid):
+        database.execute("""SELECT Peer_sessionid, File_randomid, partid
+                            FROM Part
+                            WHERE File_randomid = %s AND Peer_sessionid = %s AND partid = %s""",
+                            randomid,sessionid,partid)
+        
+        sessionid, randomid, partid = database.fetchone()
+        part = Part.Part(sessionid, randomid, partid)
+        return part
+    
+    
+    
     
     @staticmethod
     def getParts(database, sessionid):

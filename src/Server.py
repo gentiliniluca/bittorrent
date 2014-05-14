@@ -181,4 +181,56 @@ class Server:
             except Exception as e:
                 print(e)
                 
+        @staticmethod
+        def fileSearchHandlerPartList(receivedString, clientSocket):
+            sessionID=receivedString[4:20]
+            randomID=receivedString[20:36]
             
+            try:
+                
+                conn_db=Connessione.Connessione()
+                #vettore dei file ottenuti dalla ricerca facendo match con la stringa
+                peers=[]
+                peers=PeerService.PeerService.getPeersfromFile(conn_db.crea_cursore(),randomID)
+                file=FileService.FileService.getFile(conn_db.crea_cursore(),randomID)
+                conn_db.esegui_commit()
+                conn_db.chiudi_connessione()
+                
+                numPart=int(file.lenfile) // int(file.lenpart)
+                
+                if(int(file.lenfile)%int(file.lenpart)!=0)
+                    numPart=numPart+1
+                
+                sendingString="AFCH"+Util.Util.adattaStringa(str(len(peers)))
+                partPresence=""
+                
+                i=0
+                #per ogni peer
+                while(i<len(peers)):
+                    partPresence=""
+                    j=0
+                    while(j<numPart):
+                        
+                        try:
+                            conn_db=Connessione.Connessione()
+                            part=PartService.PartService.getPart(conn_db.crea_cursore(),peer[i].sessionid,randomID,str(j))
+                            conn_db.esegui_commit()
+                            conn_db.chiudi_connessione()
+                            #attenzione la stringa è ribaltata
+                            partPresence=partPresence+"1"
+                        
+                        except Exception as e:
+                            partPresence=partPresence+"0"
+                        j=j+1
+                    partPresence=partPresence[::-1]
+                    intpartPresence=int(partPresence,2)
+                    sendingString=sendingString+peers[i].ipp2p+Util.Util.adattaStringa(5,peers[i].pp2p)+str(intpartPresence)
+            
+                    i=i+1
+                
+                print("\t\t\t\t\t\t\t->Restituisco: " + sendingString)
+                clientSocket.send(sendingString)
+                print("\t\t\t\t\t\t\t->OK")
+                
+            except Exception as e:
+                print(e)
