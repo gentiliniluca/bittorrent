@@ -74,14 +74,18 @@ class Server:
     @staticmethod
     def logoutHandler(receivedString, clientSocket):
         sessionID = receivedString[4:20]
-        logout=TRUE
+        logout=True
         
         print("\t\t\t\t\t\t\tOperazione LogOut. SessionID: " + sessionID)
         
         try:
+            
             conn_db = Connessione.Connessione()
+            print("Creata connessione")
             parts=[]
+            print("Creato il vettore")
             parts = PartService.PartService.getParts(conn_db.crea_cursore(), sessionID)
+            print("Vettore riempito")
             conn_db.esegui_commit()
             conn_db.chiudi_connessione()    
 
@@ -94,12 +98,12 @@ class Server:
                 conn_db.chiudi_connessione()
 
                 if(conut<=1):
-                    logout=FALSE
+                    logout=False
                     break
                 i=i+1    
 
 
-            if logout==TRUE:
+            if logout==True:
                 sendingString = "ALOG"+Util.Util.adattaStringa(10,str(len(parts)))
 
                 #eliminazione delle parti e del peer dal db, viene fatta una volta che siamo sicuri che sia possibile il logout 
@@ -118,7 +122,7 @@ class Server:
             print("\t\t\t\t\t\t\t->OK")
             
         except Exception as e:
-            print(e)
+           print (e)
         
     @staticmethod
     def addFileHandler(receivedString, clientSocket):
@@ -198,7 +202,7 @@ class Server:
                 
                 numPart=int(file.lenfile) // int(file.lenpart)
                 
-                if(int(file.lenfile)%int(file.lenpart)!=0)
+                if(int(file.lenfile)%int(file.lenpart)!=0):
                     numPart=numPart+1
                 
                 sendingString="AFCH"+Util.Util.adattaStringa(str(len(peers)))
@@ -216,7 +220,7 @@ class Server:
                             part=PartService.PartService.getPart(conn_db.crea_cursore(),peer[i].sessionid,randomID,str(j))
                             conn_db.esegui_commit()
                             conn_db.chiudi_connessione()
-                            #attenzione la stringa è ribaltata
+                            #attenzione la stringa e' ribaltata
                             partPresence=partPresence+"1"
                         
                         except Exception as e:
