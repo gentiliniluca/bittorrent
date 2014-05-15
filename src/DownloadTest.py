@@ -3,8 +3,8 @@ import SharedFileService
 import SharedPartService
 import os
 
-file_path = "/home/davide/Immagini/AVVOLTOIO.JPG"
-file_path2 = "/home/davide/Immagini/AVVOLTOIO2.JPG"
+file_path = "/home/davide/Immagini/DeathNote3.jpg"
+file_path2 = "/home/davide/Immagini/DeathNote30.jpg"
 
 partid = 0
 
