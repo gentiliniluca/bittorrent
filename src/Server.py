@@ -97,7 +97,7 @@ class Server:
                 conn_db.esegui_commit()
                 conn_db.chiudi_connessione()
 
-                if(conut<=1):
+                if(count<=1):
                     logout=False
                     break
                 i=i+1    
@@ -245,7 +245,7 @@ class Server:
             randomID=receivedString[20:36]
             partID=receivedString[36:42]
             
-             try:
+            try:
                 conn_db=Connessione.Connessione()
                 part=PartService.PartService.insertNewPart(conn_db.crea_cursore(),sessionID,randomID,partID)
                 conn_db.esegui_commit()

@@ -21,42 +21,43 @@ class GestioneTracker:
             if(newpid == 0):
                 try:
                     s.close()
+                    try:
+                        while 1:  #mi controllo la persistenza del peer
+ 
+                            receivedString = Server.Server.readSocket(clientSocket)
+                            operazione = receivedString[0:4]
 
-                    #Server.Server.expiredPacketHandler()
+                            if operazione == "":
+                                break
 
-                    receivedString = Server.Server.readSocket(clientSocket)
-                    operazione = receivedString[0:4]
+                            #login
+                            if operazione.upper() == "LOGI":
+                                Server.Server.loginHandler(receivedString, clientSocket)
 
-                    if operazione == "":
-                        break
+                            #logout         
+                            if operazione.upper() == "LOGO":
+                                Server.Server.logoutHandler(receivedString, clientSocket)                   
+
+                            #addfile         
+                            if operazione.upper() == "ADDR":
+                                Server.Server.addFileHandler(receivedString, clientSocket) 
+
+                            #ricerca parte 1 LOOK
+                            if operazione.upper() == "LOOK":
+                                Server.Server.fileSearchHandler(receivedString, clientSocket) 
+
+                            #ricerca parte 2 FCHU
+                            if operazione.upper() == "FCHU":
+                                Server.Server.fileSearchHandlerPartList(receivedString, clientSocket)
+
+                            #notifica download
+                            if operazione.upper() == "RPAD":
+                                Server.Server.downloadNotification(receivedString, clientSocket)
   
-
-                    #login
-                    if operazione.upper() == "LOGI":
-                        Server.Server.loginHandler(receivedString, clientSocket)
-
-                    #logout         
-                    if operazione.upper() == "LOGO":
-                        Server.Server.logoutHandler(receivedString, clientSocket)                   
-                    
-                    #addfile         
-                    if operazione.upper() == "ADDR":
-                        Server.Server.addFileHandler(receivedString, clientSocket) 
-                    
-                    #ricerca parte 1 LOOK
-                    if operazione.upper() == "LOOK":
-                        Server.Server.fileSearchHandler(receivedString, clientSocket) 
-                        
-                    #ricerca parte 2 FCHU
-                    if operazione.upper() == "FCHU":
-                        Server.Server.fileSearchHandlerPartList(receivedString, clientSocket)
-                    
-                    #notifica download
-                    if operazione.upper() == "RPAD":
-                        Server.Server.downloadNotification(receivedString, clientSocket)
-
-                  
-
+                    except Exception as nonpersistente:
+                        print nonpersistente
+                        print("Connessione non persistente")
+                
                 except Exception as e: 
                     print e
                     print("\t\t\t\t\t\tErrore ricezione lato server")
