@@ -50,6 +50,10 @@ class GestioneTracker:
                     #ricerca parte 2 FCHU
                     if operazione.upper() == "FCHU":
                         Server.Server.fileSearchHandlerPartList(receivedString, clientSocket)
+                    
+                    #notifica download
+                    if operazione.upper() == "RPAD":
+                        Server.Server.downloadNotification(receivedString, clientSocket)
 
                   
 

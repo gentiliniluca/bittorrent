@@ -53,6 +53,15 @@ class PartService:
         return count
     
     @staticmethod
+    def getPartCountfromSessionidRandomid(database, sessionid, randomid):
+        database.execute("""SELECT count(*)
+                            FROM Part
+                            WHERE Peer_sessionid = %s AND File_randomid = %s""",
+                            sessionid,randomid)
+        count, = database.fetchone()
+        return count
+    
+    @staticmethod
     def deleteParts(database, sessionid):
         database.execute("""DELETE FROM Part
                             WHERE Peer_sessionid = %s""",
