@@ -143,7 +143,7 @@ class Server:
                 
             #salvo il file e le parti sul db
             conn_db=Connessione.Connessione()
-            Fileservice.FileService.insertNewFile(conn_db.crea_cursore(),sessionID,randomID,lenFile,lenPart,fileNamePulito)
+            FileService.FileService.insertNewFile(conn_db.crea_cursore(),sessionID,randomID,int(lenFile),int(lenPart),fileNamePulito)
             conn_db.esegui_commit()
             conn_db.chiudi_connessione()
             

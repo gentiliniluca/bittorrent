@@ -96,19 +96,19 @@ class Client:
             nomefile = raw_input("Inserire il nome del file: " + Util.LOCAL_PATH)
             lenfile=os.path.getsize(Util.LOCAL_PATH+nomefile)
             
-            sharedfile = SharedFileService.SharedFileService.insertNewSharedFile(conn_db.crea_cursore(), nomefile, lenfile, Util.Util.LENPART)
+            sharedfile = SharedFileService.SharedFileService.insertNewSharedFile(conn_db.crea_cursore(), nomefile, lenfile, Util.LENPART)
             conn_db.esegui_commit()
             conn_db.chiudi_connessione()
-            
+                        
             #scrittura delle parti
             i=0
-            count=lenfile//Util.Util.LENPART
-            if(lenfile % Util.Util.LENPART !=0):
+            count=lenfile//Util.LENPART
+            if(lenfile % Util.LENPART !=0):
                 count=count+1
                 
             file_object = open(Util.LOCAL_PATH+nomefile)
             while True:
-                data = file_object.read(Util.Util.LENPART)
+                data = file_object.read(Util.LENPART)
                 if not data:
                     break
                 else:
@@ -122,14 +122,11 @@ class Client:
             print e
             print("Errore aggiunta file")
         
-        finally:
-            conn_db.esegui_commit()
-            conn_db.chiudi_connessione()
         
         #formatto e invio stringa di aggiunta file al tracker    
         try:
             nomefile = Util.Util.aggiungi_spazi_finali(nomefile,100)
-            stringa_da_inviare="ADDR"+SessionID+randomid+Util.Util.adattaStringa(10,str(lenfile))+str(Util.LENPART)+nomefile
+            stringa_da_inviare="ADDR"+SessionID+sharedfile.randomid+Util.Util.adattaStringa(10,str(lenfile))+Util.Util.adattaStringa(6,str(Util.LENPART))+nomefile
             print(stringa_da_inviare)
             sock = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
             sock.connect((Util.IPTracker, int(Util.PORTTracker) ))

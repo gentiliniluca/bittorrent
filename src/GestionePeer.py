@@ -14,9 +14,7 @@ class GestionePeer:
             operazione_utente = 1
             SessionID=" "
             while(int(operazione_utente) != 0):
-                operazione_utente = Client.Client.visualizza_menu_principale()
-                print("Valore: " + str(operazione_utente) +" per il sessionID= "+SessionID)
-                           
+                operazione_utente = Client.Client.visualizza_menu_principale()                        
                                     
                 #login
                 if(int(operazione_utente) == 1):            
