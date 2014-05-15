@@ -28,11 +28,14 @@ class Util:
 
     global USEMODE
     USEMODE = ""
+    
+    global LENPART
+    LENPART = 262144  #in byte
         
     
     
     global LOCAL_PATH #percorso file condivisi
-    LOCAL_PATH = "/home/lorenzo/Desktop/bittorrent/src/FileCondivisi/"
+    LOCAL_PATH = "/home/luca/Desktop/bittorrent/src/FileCondivisi/"
     
     @staticmethod
     def adattaStringa(lunghezzaFinale, stringa):

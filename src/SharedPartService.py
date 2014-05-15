@@ -22,3 +22,7 @@ class SharedPartService:
         sharedPart = SharedPart.SharedPart(partid, data, SharedFile_randomid)
         
         return sharedPart
+    
+    @staticmethod
+    def delete(database):
+        database.execute("""DELETE FROM SharedPart""")
