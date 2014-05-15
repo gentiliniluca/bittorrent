@@ -79,13 +79,9 @@ class Server:
         print("\t\t\t\t\t\t\tOperazione LogOut. SessionID: " + sessionID)
         
         try:
-            
             conn_db = Connessione.Connessione()
-            print("Creata connessione")
             parts=[]
-            print("Creato il vettore")
             parts = PartService.PartService.getParts(conn_db.crea_cursore(), sessionID)
-            print("Vettore riempito")
             conn_db.esegui_commit()
             conn_db.chiudi_connessione()    
 
@@ -93,7 +89,7 @@ class Server:
             i=0
             while(i<len(parts)):
                 conn_db = Connessione.Connessione()
-                count = int(PartService.PartService.getPartCount(conn_db.crea_cursore(), parts[i].File_randomid,parts[i].partid))
+                count = int(PartService.PartService.getPartCount(conn_db.crea_cursore(), parts[i].File_randomid, parts[i].partid))
                 conn_db.esegui_commit()
                 conn_db.chiudi_connessione()
 

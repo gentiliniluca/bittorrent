@@ -21,7 +21,6 @@ class Util:
     global PASSWORD
     PASSWORD = "lucaluca"
     
-    
 
     global SLEEPTIME
     SLEEPTIME = 2

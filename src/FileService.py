@@ -16,7 +16,8 @@ class FileService:
         i = 0
         while i < npart:
             partid = i
-            PartService.PartService.insertNewPart(sessionid, randomid, partid)
+            PartService.PartService.insertNewPart(database, sessionid, randomid, partid)
+            i=i+1
     
     @staticmethod
     def getFile(database, randomid):

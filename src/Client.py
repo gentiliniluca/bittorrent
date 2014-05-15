@@ -131,6 +131,8 @@ class Client:
             sock = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
             sock.connect((Util.IPTracker, int(Util.PORTTracker) ))
             sock.send(stringa_da_inviare)
+            risposta=sock.recv(14)
+            print("Ricevuto: "+risposta+", Numero parti condivise: "+risposta[4:12])
             sock.close()
         except Exception as e:
             print e

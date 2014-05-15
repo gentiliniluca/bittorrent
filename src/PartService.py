@@ -49,7 +49,7 @@ class PartService:
                             FROM Part
                             WHERE File_randomid = %s AND partid = %s""",
                             randomid, partid)
-        count, = database.fetchone()
+        count = database.fetchone()
         return count
     
     @staticmethod
@@ -58,11 +58,11 @@ class PartService:
                             FROM Part
                             WHERE Peer_sessionid = %s AND File_randomid = %s""",
                             sessionid,randomid)
-        count, = database.fetchone()
+        count = database.fetchone()
         return count
     
     @staticmethod
     def deleteParts(database, sessionid):
         database.execute("""DELETE FROM Part
                             WHERE Peer_sessionid = %s""",
-                            (sessionid))  
+                            sessionid ) 
