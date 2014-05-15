@@ -70,4 +70,4 @@ class GestioneTracker:
             else:
                 clientSocket.close()
 
-    print("Terminato.")
+        print("Terminato tracker.")
