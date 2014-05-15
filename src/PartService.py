@@ -15,7 +15,7 @@ class PartService:
         database.execute("""SELECT Peer_sessionid, File_randomid, partid
                             FROM Part
                             WHERE File_randomid = %s AND Peer_sessionid = %s AND partid = %s""",
-                            randomid,sessionid,partid)
+                            (randomid,sessionid,partid))
         
         sessionid, randomid, partid = database.fetchone()
         part = Part.Part(sessionid, randomid, partid)
@@ -48,8 +48,8 @@ class PartService:
         database.execute("""SELECT count(*)
                             FROM Part
                             WHERE File_randomid = %s AND partid = %s""",
-                            randomid, partid)
-        count = database.fetchone()
+                            (randomid, partid))
+        count, = database.fetchone()
         return count
     
     @staticmethod
@@ -57,8 +57,8 @@ class PartService:
         database.execute("""SELECT count(*)
                             FROM Part
                             WHERE Peer_sessionid = %s AND File_randomid = %s""",
-                            sessionid,randomid)
-        count = database.fetchone()
+                            (sessionid,randomid))
+        count, = database.fetchone()
         return count
     
     @staticmethod
