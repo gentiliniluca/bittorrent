@@ -23,6 +23,14 @@ class GestionePeer:
                 #carica file
                 if(int(operazione_utente) == 2):            
                     Client.Client.addFile(SessionID)
+                
+                #ricerca file
+                if(int(operazione_utente) == 3):            
+                    Client.Client.searchFile(SessionID)
+                    
+                #download file
+                if(int(operazione_utente) == 4):            
+                    Client.Client.downloadFile(SessionID)
                     
                 #logout
                 if(int(operazione_utente) == 5):            
