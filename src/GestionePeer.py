@@ -1,4 +1,4 @@
- 
+import Client 
 import Util
 import os
 import signal
@@ -15,7 +15,7 @@ class GestionePeer:
             SessionID=" "
             while(int(operazione_utente) != 0):
                 operazione_utente = Client.Client.visualizza_menu_principale()
-                #print("Valore: " + str(operazione_utente) +" per il sessionID= "+SessionID)
+                print("Valore: " + str(operazione_utente) +" per il sessionID= "+SessionID)
                            
                                     
                 #login

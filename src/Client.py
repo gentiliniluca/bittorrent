@@ -23,9 +23,9 @@ class Client:
     def visualizza_menu_principale():
         
         while True: 
-            print("\n************************\n*  1 - Login           *\n*  2 - Aggiunta File    *\n*  3 - Ricerca       *\n*  4 - Download     *\n*  5 - Logout        *\n*  0 - Fine            *\n************************")
-            out=raw_input("\nOperazione scelta: ")
-            if(int(out) >= 0 and int(out) <= 5 ) :
+            print("\n************************\n*  1 - Login           *\n*  2 - Aggiunta File   *\n*  3 - Ricerca         *\n*  4 - Download        *\n*  5 - Logout          *\n*  0 - Fine            *\n************************\n")
+            out=raw_input("Operazione scelta: ")
+            if(int(out) >= 0 and int(out) <= 5 ):
                 break
             print("Valore inserito errato!")
         
@@ -65,7 +65,7 @@ class Client:
                 print(risposta)
                 returnString=""
                 if(risposta[0:4]=="NLOG"):
-                    print("Non è possibile fare Logout")
+                    print("Non si puo fare Logout")
                     returnString = SessionID
                 else:
                     print("Logout consentito")
@@ -75,7 +75,7 @@ class Client:
                     SharedFileService.SharedFileService.delete(conn_db.crea_cursore())
                     conn_db.esegui_commit()
                     conn_db.chiudi_connessione()
-                    returnString = ""
+                    returnString = "" 
                 
                 sock.close()
                 
