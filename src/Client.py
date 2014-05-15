@@ -97,7 +97,27 @@ class Client:
             lenfile=os.path.getsize(Util.LOCAL_PATH+nomefile)
             
             sharedfile = SharedFileService.SharedFileService.insertNewSharedFile(conn_db.crea_cursore(), nomefile, lenfile, Util.Util.LENPART)
+            conn_db.esegui_commit()
+            conn_db.chiudi_connessione()
             
+            #scrittura delle parti
+            i=0
+            count=lenfile//Util.Util.LENPART
+            if(lenfile % Util.Util.LENPART !=0):
+                count=count+1
+                
+            file_object = open(Util.LOCAL_PATH+nomefile)
+            while True:
+                data = file_object.read(Util.Util.LENPART)
+                if not data:
+                    break
+                else:
+                    conn_db = Connessione.Connessione()
+                    part=SharedPartService.SharedPartService.insertNewSharedPart(conn_db.crea_cursore(), i, data, sharedfile.randomid)
+                    conn_db.esegui_commit()
+                    conn_db.chiudi_connessione()
+                i= i + 1
+                
         except Exception as e:
             print e
             print("Errore aggiunta file")
@@ -109,18 +129,14 @@ class Client:
         #formatto e invio stringa di aggiunta file nel superpeer    
         try:
             nomefile = Util.Util.aggiungi_spazi_finali(nomefile,100)
-            stringa_da_inviare="ADFF"+SessionID+filemd5+nomefile
-            #print(stringa_da_inviare)
+            stringa_da_inviare="ADDR"+SessionID+randomid+Util.Util.adattaStringa(10,str(lenfile))+str(Util.LENPART)+nomefile
+            print(stringa_da_inviare)
             sock = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
-            sock.connect((Util.IPSuperPeer, int(Util.PORTSuperPeer) ))
+            sock.connect((Util.IPTracker, int(Util.PORTTracker) ))
             sock.send(stringa_da_inviare)
             sock.close()
         except Exception as e:
             print e
-            conn_db = Connessione.Connessione()
-            sharedfile.delete(conn_db.crea_cursore())
-            conn_db.esegui_commit()
-            conn_db.chiudi_connessione()
             print("Errore per contattare il superpeer in add file")
         
     
