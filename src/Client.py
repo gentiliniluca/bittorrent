@@ -22,8 +22,7 @@ class Client:
     @staticmethod
     def visualizza_menu_principale():
         
-        while True:
-            
+        while True: 
             print("\n************************\n*  1 - Login           *\n*  2 - Aggiunta File    *\n*  3 - Ricerca       *\n*  4 - Download     *\n*  5 - Logout        *\n*  0 - Fine            *\n************************")
             out=raw_input("\nOperazione scelta: ")
             if(int(out) >= 0 and int(out) <= 5 ) :
