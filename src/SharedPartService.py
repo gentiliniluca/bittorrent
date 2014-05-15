@@ -15,7 +15,7 @@ class SharedPartService:
         database.execute("""SELECT partid, data, SharedFile_randomid 
                             FROM SharedPart
                             WHERE SharedFile_randomid = %s AND partid = %s""",
-                            randomid, partid)
+                            (randomid, partid))
         
         partid, data, SharedFile_randomid = database.fetchone()
         
