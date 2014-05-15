@@ -238,3 +238,28 @@ class Server:
                 
             except Exception as e:
                 print(e)
+                
+        @staticmethod
+        def downloadNotification(receivedString, clientSocket):
+            sessionID=receivedString[4:20]
+            randomID=receivedString[20:36]
+            partID=receivedString[36:42]
+            
+             try:
+                conn_db=Connessione.Connessione()
+                part=PartService.PartService.insertNewPart(conn_db.crea_cursore(),sessionID,randomID,partID)
+                conn_db.esegui_commit()
+                conn_db.chiudi_connessione()
+                
+                conn_db=Connessione.Connessione()
+                count=PartService.PartService.getPartCountfromSessionidRandomid(conn_db.crea_cursore(),sessionID,randomID)
+                conn_db.esegui_commit()
+                conn_db.chiudi_connessione()
+                
+                sendingString="APAD"+Util.Util.adattaStringa(8,count)
+                print("\t\t\t\t\t\t\t->Restituisco: " + sendingString)
+                clientSocket.send(sendingString)
+                print("\t\t\t\t\t\t\t->OK")
+                        
+            except Exception as e:
+                print(e)
