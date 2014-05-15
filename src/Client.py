@@ -23,8 +23,8 @@ class Client:
     def visualizza_menu_principale():
         
         while True: 
-            print("\n************************\n*  1 - Login           *\n*  2 - Aggiunta File   *\n*  3 - Ricerca         *\n*  4 - Download        *\n*  5 - Logout          *\n*  0 - Fine            *\n************************\n")
-            out=raw_input("Operazione scelta: ")
+            print("\n************************\n*  1 - Login           *\n*  2 - Aggiunta File   *\n*  3 - Ricerca         *\n*  4 - Download        *\n*  5 - Logout          *\n*  0 - Fine            *\n************************")
+            out=raw_input("\nOperazione scelta: ")
             if(int(out) >= 0 and int(out) <= 5 ):
                 break
             print("Valore inserito errato!")
@@ -138,5 +138,15 @@ class Client:
         except Exception as e:
             print e
             print("Errore per contattare il superpeer in add file")
+            
+            
+    @staticmethod
+    def initServerSocket():
+        
+        s = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
+        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        s.bind((Util.HOST, Util.PORT))
+        s.listen(10)
+        return s
         
     
