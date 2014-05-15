@@ -126,7 +126,7 @@ class Client:
             conn_db.esegui_commit()
             conn_db.chiudi_connessione()
         
-        #formatto e invio stringa di aggiunta file nel superpeer    
+        #formatto e invio stringa di aggiunta file al tracker    
         try:
             nomefile = Util.Util.aggiungi_spazi_finali(nomefile,100)
             stringa_da_inviare="ADDR"+SessionID+randomid+Util.Util.adattaStringa(10,str(lenfile))+str(Util.LENPART)+nomefile
