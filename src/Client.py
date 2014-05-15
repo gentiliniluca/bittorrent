@@ -23,9 +23,9 @@ class Client:
     def visualizza_menu_principale():
         
         while True: 
-            print("\n************************\n*  1 - Login           *\n*  2 - Aggiunta File    *\n*  3 - Ricerca       *\n*  4 - Download     *\n*  5 - Logout        *\n*  0 - Fine            *\n************************")
+            print("\n************************\n*  1 - Login           *\n*  2 - Aggiunta File   *\n*  3 - Ricerca         *\n*  4 - Download        *\n*  5 - Logout          *\n*  0 - Fine            *\n************************")
             out=raw_input("\nOperazione scelta: ")
-            if(int(out) >= 0 and int(out) <= 5 ) :
+            if(int(out) >= 0 and int(out) <= 5 ):
                 break
             print("Valore inserito errato!")
         
@@ -65,7 +65,7 @@ class Client:
                 print(risposta)
                 returnString=""
                 if(risposta[0:4]=="NLOG"):
-                    print("Non è possibile fare Logout")
+                    print("Non si puo fare Logout")
                     returnString = SessionID
                 else:
                     print("Logout consentito")
@@ -75,7 +75,7 @@ class Client:
                     SharedFileService.SharedFileService.delete(conn_db.crea_cursore())
                     conn_db.esegui_commit()
                     conn_db.chiudi_connessione()
-                    returnString = ""
+                    returnString = "" 
                 
                 sock.close()
                 
@@ -96,19 +96,19 @@ class Client:
             nomefile = raw_input("Inserire il nome del file: " + Util.LOCAL_PATH)
             lenfile=os.path.getsize(Util.LOCAL_PATH+nomefile)
             
-            sharedfile = SharedFileService.SharedFileService.insertNewSharedFile(conn_db.crea_cursore(), nomefile, lenfile, Util.Util.LENPART)
+            sharedfile = SharedFileService.SharedFileService.insertNewSharedFile(conn_db.crea_cursore(), nomefile, lenfile, Util.LENPART)
             conn_db.esegui_commit()
             conn_db.chiudi_connessione()
-            
+                        
             #scrittura delle parti
             i=0
-            count=lenfile//Util.Util.LENPART
-            if(lenfile % Util.Util.LENPART !=0):
+            count=lenfile//Util.LENPART
+            if(lenfile % Util.LENPART !=0):
                 count=count+1
                 
             file_object = open(Util.LOCAL_PATH+nomefile)
             while True:
-                data = file_object.read(Util.Util.LENPART)
+                data = file_object.read(Util.LENPART)
                 if not data:
                     break
                 else:
@@ -122,14 +122,11 @@ class Client:
             print e
             print("Errore aggiunta file")
         
-        finally:
-            conn_db.esegui_commit()
-            conn_db.chiudi_connessione()
         
         #formatto e invio stringa di aggiunta file al tracker    
         try:
             nomefile = Util.Util.aggiungi_spazi_finali(nomefile,100)
-            stringa_da_inviare="ADDR"+SessionID+randomid+Util.Util.adattaStringa(10,str(lenfile))+str(Util.LENPART)+nomefile
+            stringa_da_inviare="ADDR"+SessionID+sharedfile.randomid+Util.Util.adattaStringa(10,str(lenfile))+Util.Util.adattaStringa(6,str(Util.LENPART))+nomefile
             print(stringa_da_inviare)
             sock = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
             sock.connect((Util.IPTracker, int(Util.PORTTracker) ))
@@ -168,39 +165,48 @@ class Client:
             if(stringa_ricevuta!="AFIN"):
                 print "Errore non ricevuto AFIN"
             else:
-            stringa_ricevuta=sock.recv(3)
+                stringa_ricevuta=sock.recv(3)
                 print(stringa_ricevuta)
-        occorenze_md5=int(stringa_ricevuta)
+                occorenze_md5=int(stringa_ricevuta)
                 print("occorenze md5: "+str(occorenze_md5))
 
                 for i in range(0,occorenze_md5):
                         #print("ciao contatore: "+str(i))
                         filemd5=sock.recv(16)
                         print("md5: "+filemd5)
-            filename=sock.recv(100)
+                        filename=sock.recv(100)
                         #elimino eventuali asterischi e spazi finali
                         filename=Util.Util.elimina_spazi_iniziali_finali(filename)
                         filename=Util.Util.elimina_asterischi_iniziali_finali(filename)
                         
                         print("file name: "+filename)
-            occorenze_peer=int(sock.recv(3))
+                        occorenze_peer=int(sock.recv(3))
                         print("occorenze peer: "+str(occorenze_peer))
                         #print("Contatore: "+str(i)+"filemd5: "+filemd5+"filename: "+filename+" Occorenze Perr: "+str(occorenze_peer))
-            for j in range(0,occorenze_peer):
-                ipp2p=sock.recv(39)
-                pp2p=sock.recv(5)
+                        for j in range(0,occorenze_peer):
+                                ipp2p=sock.recv(39)
+                                pp2p=sock.recv(5)
                                 print("IPP2P"+ipp2p+"PP2P: "+pp2p )
-                try:
-                            conn_db=Connessione.Connessione()
-                            SearchResultService.SearchResultService.insertNewSearchResult(conn_db.crea_cursore(), ipp2p, pp2p, filemd5, filename, "0000000000000000", 'T')
-                    finally:
-                            conn_db.esegui_commit()
-                            conn_db.chiudi_connessione   
+                                try:
+                                    conn_db=Connessione.Connessione()
+                                    SearchResultService.SearchResultService.insertNewSearchResult(conn_db.crea_cursore(), ipp2p, pp2p, filemd5, filename, "0000000000000000", 'T')
+                                finally:
+                                    conn_db.esegui_commit()
+                                    conn_db.chiudi_connessione   
             sock.close()
             
         except Exception as e:
             print e
             print"Errore nel contattare il supernodo per ricerca file"
             
+            
+    @staticmethod
+    def initServerSocket():
+        
+        s = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
+        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        s.bind((Util.HOST, Util.PORT))
+        s.listen(10)
+        return s
         
     

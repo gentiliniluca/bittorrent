@@ -5,21 +5,21 @@ import random
 class Util:
     
     global HOST
-    HOST = "fd00:0000:0000:0000:4149:3b95:a940:158f"
+    HOST = "fd00:0000:0000:0000:c5f1:81b9:ee7e:efbf"
     global PORT
-    PORT = 3332
+    PORT = 3331
     
     global IPTracker
-    IPTracker="fd00:0000:0000:0000:eda8:4c7d:1f6b:3d55"
+    IPTracker="fd00:0000:0000:0000:11e0:eb58:6d93:4f05"
  
     global PORTTracker
     PORTTracker= 8000
     
     global USERNAME
-    USERNAME = "p2pAdmin"
+    USERNAME = "root"
     
     global PASSWORD
-    PASSWORD = "p2pAdmin"
+    PASSWORD = "lucaluca"
     
     
 
