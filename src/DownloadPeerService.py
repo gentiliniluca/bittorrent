@@ -17,6 +17,21 @@ class DownloadPeerService:
         downloadpeerid, ipp2p, pp2p = database.fetchone()
         downloadPeer = DownalodPeer.DownloadPeer(dowanladpeerid, ipp2p, pp2p)
         return downloadPeer
+    
+    @staticmethod
+    def getDownloadPeer(database, downloadpartid):
+        database.execute("""SELECT downloadpeerid, ipp2p, pp2p
+                            FROM DownloadPeer, DownloadPart
+                            WHERE downloadpeerid = DownloadPeer_downloadpeerid AND
+                                  downloadpartid = %s
+                            ORDER BY RAND()
+                            LIMIT 1""",
+                            downloadpartid)
+        
+        downloadpeerid, ipp2p, pp2p = database.fetchone()
+        downloadPeer = DownalodPeer.DownloadPeer(dowanladpeerid, ipp2p, pp2p)
+        
+        return downloadPeer
      
     @staticmethod
     def deleteDownloadPeer(self, database):        
