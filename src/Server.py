@@ -151,111 +151,116 @@ class Server:
         except Exception as e:
             print(e)
             
-        @staticmethod
-        def fileSearchHandler(receivedString, clientSocket):
-            sessionID=receivedString[4:20]
-            searchString=receivedString[20:40]
-            
-            searchStringClear=Util.Util.elimina_spazi_iniziali_finali(searchString)
-            searchStringClear=Util.Util.elimina_asterischi_iniziali_finali(searchStringClear)
-            
-            try:
-                conn_db=Connessione.Connessione()
-                #vettore dei file ottenuti dalla ricerca facendo match con la stringa
-                files=[]
-                files=FileService.FileService.getFiles(conn_db.crea_cursore(),searchStringClear)
-                conn_db.esegui_commit()
-                conn_db.chiudi_connessione()
+    @staticmethod
+    def fileSearchHandler(receivedString, clientSocket):
+        sessionID=receivedString[4:20]
+        searchString=receivedString[20:40]
+
+        searchStringClear=Util.Util.elimina_spazi_iniziali_finali(searchString)
+        searchStringClear=Util.Util.elimina_asterischi_iniziali_finali(searchStringClear)
+
+        print(sessionID+" "+searchStringClear)
+
+        try:
+            conn_db=Connessione.Connessione()
+            #vettore dei file ottenuti dalla ricerca facendo match con la stringa
+            files=[]
+            files=FileService.FileService.getFiles(conn_db.crea_cursore(),searchStringClear)
+            print("OK 1")
+            conn_db.esegui_commit()
+            conn_db.chiudi_connessione()
+
+            sendingString="ALOO"+Util.Util.adattaStringa(3,str(len(files)))
+            print("ok len files")
+
+            i=0
+            while(i<len(files)):
+                sendingString=sendingString+files[i].randomid+Util.Util.aggiungi_spazi_finali(files[i].filename,100)
+                sendingString=sendingString+Util.Util.adattaStringa(10,files[i].lenfile)+files[i].lenpart
+                i=i+1
+
+            print("\t\t\t\t\t\t\t->Restituisco: " + sendingString)
+            clientSocket.send(sendingString)
+            print("\t\t\t\t\t\t\t->OK")
+
+        except Exception as e:
+            print(e)
                 
-                sendingString="ALOO"+Util.Util.adattaStringa(3,str(len(files)))
-                
-                i=0
-                while(i<len(files)):
-                    sendingString=sendingString+file[i].randomid+Util.Util.aggiungi_spazi_finali(file[i].filename,100)
-                    sendingString=sendingString+files[i].lenfile+files[i].lenpart
-                    i=i+1
-                print("\t\t\t\t\t\t\t->Restituisco: " + sendingString)
-                clientSocket.send(sendingString)
-                print("\t\t\t\t\t\t\t->OK")
-            
-            except Exception as e:
-                print(e)
-                
-        @staticmethod
-        def fileSearchHandlerPartList(receivedString, clientSocket):
-            sessionID=receivedString[4:20]
-            randomID=receivedString[20:36]
-            
-            try:
-                
-                conn_db=Connessione.Connessione()
-                #vettore dei file ottenuti dalla ricerca facendo match con la stringa
-                peers=[]
-                peers=PeerService.PeerService.getPeersfromFile(conn_db.crea_cursore(),randomID)
-                file=FileService.FileService.getFile(conn_db.crea_cursore(),randomID)
-                conn_db.esegui_commit()
-                conn_db.chiudi_connessione()
-                
-                numPart=int(file.lenfile) // int(file.lenpart)
-                
-                if(int(file.lenfile)%int(file.lenpart)!=0):
-                    numPart=numPart+1
-                
-                sendingString="AFCH"+Util.Util.adattaStringa(str(len(peers)))
+    @staticmethod
+    def fileSearchHandlerPartList(receivedString, clientSocket):
+        sessionID=receivedString[4:20]
+        randomID=receivedString[20:36]
+
+        try:
+
+            conn_db=Connessione.Connessione()
+            #vettore dei file ottenuti dalla ricerca facendo match con la stringa
+            peers=[]
+            peers=PeerService.PeerService.getPeersfromFile(conn_db.crea_cursore(),randomID)
+            file=FileService.FileService.getFile(conn_db.crea_cursore(),randomID)
+            conn_db.esegui_commit()
+            conn_db.chiudi_connessione()
+
+            numPart=int(file.lenfile) // int(file.lenpart)
+
+            if(int(file.lenfile)%int(file.lenpart)!=0):
+                numPart=numPart+1
+
+            sendingString="AFCH"+Util.Util.adattaStringa(str(len(peers)))
+            partPresence=""
+
+            i=0
+            #per ogni peer
+            while(i<len(peers)):
                 partPresence=""
+                j=0
+                while(j<numPart):
+
+                    try:
+                        conn_db=Connessione.Connessione()
+                        part=PartService.PartService.getPart(conn_db.crea_cursore(),peer[i].sessionid,randomID,str(j))
+                        conn_db.esegui_commit()
+                        conn_db.chiudi_connessione()
+                        #attenzione la stringa e' ribaltata
+                        partPresence=partPresence+"1"
+
+                    except Exception as e:
+                        partPresence=partPresence+"0"
+                    j=j+1
+                partPresence=partPresence[::-1]
+                intpartPresence=int(partPresence,2)
+                sendingString=sendingString+peers[i].ipp2p+Util.Util.adattaStringa(5,peers[i].pp2p)+str(intpartPresence)
+
+                i=i+1
+
+            print("\t\t\t\t\t\t\t->Restituisco: " + sendingString)
+            clientSocket.send(sendingString)
+            print("\t\t\t\t\t\t\t->OK")
+
+        except Exception as e:
+            print(e)
                 
-                i=0
-                #per ogni peer
-                while(i<len(peers)):
-                    partPresence=""
-                    j=0
-                    while(j<numPart):
-                        
-                        try:
-                            conn_db=Connessione.Connessione()
-                            part=PartService.PartService.getPart(conn_db.crea_cursore(),peer[i].sessionid,randomID,str(j))
-                            conn_db.esegui_commit()
-                            conn_db.chiudi_connessione()
-                            #attenzione la stringa e' ribaltata
-                            partPresence=partPresence+"1"
-                        
-                        except Exception as e:
-                            partPresence=partPresence+"0"
-                        j=j+1
-                    partPresence=partPresence[::-1]
-                    intpartPresence=int(partPresence,2)
-                    sendingString=sendingString+peers[i].ipp2p+Util.Util.adattaStringa(5,peers[i].pp2p)+str(intpartPresence)
-            
-                    i=i+1
-                
-                print("\t\t\t\t\t\t\t->Restituisco: " + sendingString)
-                clientSocket.send(sendingString)
-                print("\t\t\t\t\t\t\t->OK")
-                
-            except Exception as e:
-                print(e)
-                
-        @staticmethod
-        def downloadNotification(receivedString, clientSocket):
-            sessionID=receivedString[4:20]
-            randomID=receivedString[20:36]
-            partID=receivedString[36:42]
-            
-            try:
-                conn_db=Connessione.Connessione()
-                part=PartService.PartService.insertNewPart(conn_db.crea_cursore(),sessionID,randomID,partID)
-                conn_db.esegui_commit()
-                conn_db.chiudi_connessione()
-                
-                conn_db=Connessione.Connessione()
-                count=PartService.PartService.getPartCountfromSessionidRandomid(conn_db.crea_cursore(),sessionID,randomID)
-                conn_db.esegui_commit()
-                conn_db.chiudi_connessione()
-                
-                sendingString="APAD"+Util.Util.adattaStringa(8,count)
-                print("\t\t\t\t\t\t\t->Restituisco: " + sendingString)
-                clientSocket.send(sendingString)
-                print("\t\t\t\t\t\t\t->OK")
-                        
-            except Exception as e:
-                print(e)
+    @staticmethod
+    def downloadNotification(receivedString, clientSocket):
+        sessionID=receivedString[4:20]
+        randomID=receivedString[20:36]
+        partID=receivedString[36:42]
+
+        try:
+            conn_db=Connessione.Connessione()
+            part=PartService.PartService.insertNewPart(conn_db.crea_cursore(),sessionID,randomID,partID)
+            conn_db.esegui_commit()
+            conn_db.chiudi_connessione()
+
+            conn_db=Connessione.Connessione()
+            count=PartService.PartService.getPartCountfromSessionidRandomid(conn_db.crea_cursore(),sessionID,randomID)
+            conn_db.esegui_commit()
+            conn_db.chiudi_connessione()
+
+            sendingString="APAD"+Util.Util.adattaStringa(8,count)
+            print("\t\t\t\t\t\t\t->Restituisco: " + sendingString)
+            clientSocket.send(sendingString)
+            print("\t\t\t\t\t\t\t->OK")
+
+        except Exception as e:
+            print(e)

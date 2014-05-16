@@ -52,3 +52,7 @@ class PeerService:
         count, = database.fetchone()
         
         return count
+    
+    @staticmethod
+    def delete(database):
+        database.execute("""DELETE FROM Peer""")
