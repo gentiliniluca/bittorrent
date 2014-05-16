@@ -225,6 +225,45 @@ class Client:
             conn_db.chiudi_connessione()
             
             conn_db = Connessione.Connessione()
+            counts = DownloadPartService.DownloadPartService.getPartCount(conn_db.crea_cursore())
+            conn_db.esegui_commit()
+            conn_db.chiudi_connessione()
+            
+            i = 0
+            while i < len(counts):
+                j = 0
+                while j < len(counts[i]):
+                    conn_db = Connessione.Connessione()
+                    parallelDownload = ParallelDownloadService.ParallelDownloadService.getParallelDownload(conn_db.crea_cursore())
+                    conn_db.esegui_commit()
+                    conn_db.chiudi_connessione()
+                    
+                    if parallelDownload.number < Util.PARALLELDOWNLOADS:
+                        newpid = os.fork()
+                    
+                        if newpid == 0:
+                            conn_db = Connessione.Connessione()
+                            cursor = conn_db.crea_cursore()
+                            try:
+                                
+                                sharedPart = SharedPartService.SharedPartService.getSharedPart(cursor, searchResults[choice - 1].randomid, counts[i][j])
+                                
+                            except:
+                                
+                                downloadPeer = DownloadPeerService.DownloadPeerService.getDownloadPeer(cursor, counts[i][j])
+                                
+                                sock = socket.socket(socket.AF_INET6, socket.SOCK_STREAM) 
+                                sock.connect((downloadPeer.ipp2p, int(downloadPeer.pp2p)))
+                                sendingString = "RETP" + searchResults[choice - 1].randomid + Util.adattaStringa(8, counts[i][j])
+                                #sock.send(sendingString.encode())
+                                sock.send(sendingString)
+                                
+                            finally:
+                                
+                                conn_db.esegui_commit()
+                                conn_db.chiudi_connessione()
+            
+            conn_db = Connessione.Connessione()
             downloadPeer = DownloadPeerService.DownloadPeerService.getDownloadPeer(conn_db.crea_cursore())
             conn_db.esegui_commit()
             conn_db.chiudi_connessione()
