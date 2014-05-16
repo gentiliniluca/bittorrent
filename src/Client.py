@@ -10,6 +10,8 @@ import os
 import SharedPartService
 import SharedFileService
 import SearchResultService
+import DownloadPeerService
+import DownloadPartService
 
 
 
@@ -368,12 +370,12 @@ class Client:
                 
                 part_list=sock.recv(numparti_byte)
                 numparti_binario=bin(int(part_list))[2:]
-                print("\t\t"+str(numparti_binario)+"   "+str(part_list))
+                print("\t\tnum part binario:"+str(numparti_binario)+"   part list:"+str(part_list))
                 
                 j=len(numparti_binario)-1
                 while(j>=0):
                     if(numparti_binario[j]=='1'):
-                        downloadpart=DownloadPartService.DownloadPart.Service.insertNewDownloadPart(conn_db.crea_cursore(), j,downloadpeer.downloadpeerid )
+                        downloadpart=DownloadPartService.DownloadPart.Service.insertNewDownloadPart(conn_db.crea_cursore(), j, downloadpeer.downloadpeerid )
                         print("\t\t inserito parte db")
                     j=j-1
                 

@@ -218,7 +218,7 @@ class Server:
 
                     try:
                         conn_db=Connessione.Connessione()
-                        part=PartService.PartService.getPart(conn_db.crea_cursore(),peer[i].sessionid,randomID,str(j))
+                        part=PartService.PartService.getPart(conn_db.crea_cursore(),peers[i].sessionid,randomID,j)
                         conn_db.esegui_commit()
                         conn_db.chiudi_connessione()
                         #attenzione la stringa e' ribaltata
