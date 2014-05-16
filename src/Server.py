@@ -206,7 +206,7 @@ class Server:
             if(int(file.lenfile)%int(file.lenpart)!=0):
                 numPart=numPart+1
 
-            sendingString="AFCH"+Util.Util.adattaStringa(str(len(peers)))
+            sendingString="AFCH"+Util.Util.adattaStringa(3,str(len(peers)))
             partPresence=""
 
             i=0

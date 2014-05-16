@@ -339,18 +339,27 @@ class Client:
     def notificaTracker(sessionid):
         try:
             conn_db=Connessione.Connessione()
-            serachResultTrue=SearchResutlService.SearchResutlService.getSearchResultTrue(conn_db.crea_cursore())
-        
+            serachResultTrue=SearchResultService.SearchResultService.getSearchResultTrue(conn_db.crea_cursore())
+            print("\tc'e download")
             stringa_da_trasmettere="FCHU"+sessionid+serachResultTrue.randomid
             sock = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
             sock.connect((Util.IPTracker, int(Util.PORTTracker)))
             sock.send(stringa_da_trasmettere.encode())
             
             stringa_ricevuta = sock.recv(4)
+            hitpeer = sock.recv(3)
+            i=0
+            while(i<int(hitpeer)):
+                ipp2p=sock.recv(39)
+                pp2p=sock.recv(5)
+                #parte elaborazione partlist
+                
+                i=i+1
             print(stringa_ricevuta)
             sock.close()
             
         except Exception as e:
+            print(e)
             print("non ci sono download in corso")
         finally:
             conn_db.esegui_commit()

@@ -56,10 +56,9 @@ class SearchResultService:
     
     @staticmethod
     def getSearchResultTrue(database):
-        
         database.execute("""SELECT idsearchresult, randomid, filename, lenfile, lenpart, choose
                             FROM SearchResult
-                            WHERE choose='T' """)
+                            WHERE choose= %s""", "T")
         
         idsearchresult, randomid, filename, lenfile, lenpart, choose = database.fetchone()
         
