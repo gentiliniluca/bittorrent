@@ -7,11 +7,13 @@ import string
 import Util
 import sys
 import os
+import SharedPart
 import SharedPartService
 import SharedFileService
 import SearchResultService
 import DownloadPeerService
 import DownloadPartService
+import ParallelDownloadService
 
 
 
@@ -100,7 +102,7 @@ class Client:
             nomefile = raw_input("Inserire il nome del file: " + Util.LOCAL_PATH)
             lenfile=os.path.getsize(Util.LOCAL_PATH+nomefile)
             
-            sharedfile = SharedFileService.SharedFileService.insertNewSharedFile(conn_db.crea_cursore(), nomefile, lenfile, Util.LENPART)
+            sharedfile = SharedFileService.SharedFileService.insertNewSharedFile(conn_db.crea_cursore(), None, nomefile, lenfile, Util.LENPART)
             conn_db.esegui_commit()
             conn_db.chiudi_connessione()
                         
@@ -227,6 +229,11 @@ class Client:
             conn_db.chiudi_connessione()
             
             conn_db = Connessione.Connessione()
+            sharedFile = SharedFileService.SharedFileService.insertNewSharedFile(conn_db.crea_cursore(), searchResults[choice - 1].randomid, searchResults[choice - 1].filename, searchResults[choice - 1].lenfile, searchResults[choice - 1].lenpart)
+            conn_db.esegui_commit()
+            conn_db.chiudi_connessione()
+            
+            conn_db = Connessione.Connessione()
             counts = DownloadPartService.DownloadPartService.getPartCount(conn_db.crea_cursore())
             conn_db.esegui_commit()
             conn_db.chiudi_connessione()
@@ -244,15 +251,24 @@ class Client:
                         newpid = os.fork()
                     
                         if newpid == 0:
+                            
                             conn_db = Connessione.Connessione()
-                            cursor = conn_db.crea_cursore()
+                            ParallelDownloadService.ParallelDownloadService.increase(conn_db.crea_cursore())
+                            conn_db.esegui_commit()
+                            conn_db.chiudi_connessione()
+                            
                             try:
-                                
-                                sharedPart = SharedPartService.SharedPartService.getSharedPart(cursor, searchResults[choice - 1].randomid, counts[i][j])
+                                conn_db = Connessione.Connessione()
+                                sharedPart = SharedPartService.SharedPartService.getSharedPart(conn_db.crea_cursore(), searchResults[choice - 1].randomid, counts[i][j])
+                                conn_db.esegui_commit()
+                                conn_db.chiudi_connessione()
                                 
                             except:
                                 
-                                downloadPeer = DownloadPeerService.DownloadPeerService.getDownloadPeer(cursor, counts[i][j])
+                                conn_db = Connessione.Connessione()
+                                downloadPeer = DownloadPeerService.DownloadPeerService.getDownloadPeer(conn_db.crea_cursore(), counts[i][j])
+                                conn_db.esegui_commit()
+                                conn_db.chiudi_connessione()
                                 
                                 sock = socket.socket(socket.AF_INET6, socket.SOCK_STREAM) 
                                 sock.connect((downloadPeer.ipp2p, int(downloadPeer.pp2p)))
@@ -260,69 +276,86 @@ class Client:
                                 #sock.send(sendingString.encode())
                                 sock.send(sendingString)
                                 
+                                receivedString = sock.recv(10)       
+                                if receivedString[0:4].decode() == "AREP":
+                                    nChunk = int(receivedString[4:10].decode())            
+                                    chunk = bytes()
+                                    chunkCounter = 0
+                    
+                                    #file = open(Util.LOCAL_PATH + searchResults[choice - 1].filename, "wb")
+                                    sharedPart = SharedPart.SharedPart(counts[i][j], "", sharedFile.randomid)
+                                    
+                                    #inizializzo la variabile temporanea per stampre la percentuale
+                                    tmp = -1
+                                    print "\nDownloading...\t",
+                                    
+                                    while chunkCounter < nChunk:
+                                        receivedString = sock.recv(1024)
+                                        chunk = chunk + receivedString                
+                    
+                                        while True:
+                                            
+                                            #Un po' di piacere per gli occhi...
+                                            perCent = chunkCounter*100//nChunk
+                                            if(perCent % 10 == 0 and tmp != perCent):
+                                                if(tmp != -1):
+                                                    print " - ",
+                                                print str(perCent) + "%",
+                                                tmp = perCent
+                                            
+                                            if len(chunk[:5]) >=  5:
+                                                chunkLength = int(chunk[:5])
+                                            else:
+                                                break
+                    
+                                            if len(chunk[5:]) >= chunkLength:
+                                                data = chunk[5:5 + chunkLength]
+                                                #file.write(data)
+                                                sharedPart.data = sharedPart.data + data
+                                                chunkCounter = chunkCounter + 1
+                                                chunk = chunk[5 + chunkLength:]
+                                            else:
+                                                break
+                    
+                                    #file.close()
+                                    conn_db = Connessione.Connessione()
+                                    sharedPart.insert(conn_db.crea_cursore())
+                                    conn_db.esegui_commit()
+                                    conn_db.chiudi_connessione()
+                                    print ""
+                            
                             finally:
-                                
+                                conn_db = Connessione.Connessione()
+                                ParallelDownloadService.ParallelDownloadService.decrease(conn_db.crea_cursore())
                                 conn_db.esegui_commit()
                                 conn_db.chiudi_connessione()
+                                
+                                os._exit(0)
+                        
+                        else:
+                            j = j + 1
+                    
+                    # Ipotizzare presenza wait
+                
+                i = i + 1
             
             conn_db = Connessione.Connessione()
-            downloadPeer = DownloadPeerService.DownloadPeerService.getDownloadPeer(conn_db.crea_cursore())
+            sharedParts = SharedPartService.SharedPartService.getSharedParts(conn_db.crea_cursore(), sharedFile.randomid)
             conn_db.esegui_commit()
             conn_db.chiudi_connessione()
             
-            sock = socket.socket(socket.AF_INET6, socket.SOCK_STREAM) 
-            sock.connect((searchResults[choice - 1].ipp2p, int(searchResults[choice - 1].pp2p)))
-            sendingString = "RETR" + searchResults[choice - 1].filemd5
-            #sock.send(sendingString.encode())
-            sock.send(sendingString)
-
-            receivedString = sock.recv(10)        
-            if receivedString[0:4].decode() == "ARET":
-                nChunk = int(receivedString[4:10].decode())            
-                chunk = bytes()
-                chunkCounter = 0
-
-                file = open(Util.LOCAL_PATH + searchResults[choice - 1].filename, "wb")
-                
-                #inizializzo la variabile temporanea per stampre la percentuale
-                tmp = -1
-                print "\nDownloading...\t",
-                
-                while chunkCounter < nChunk:
-                    receivedString = sock.recv(1024)
-                    chunk = chunk + receivedString                
-
-                    while True:
-                        
-                        #Un po' di piacere per gli occhi...
-                        perCent = chunkCounter*100//nChunk
-                        if(perCent % 10 == 0 and tmp != perCent):
-                            if(tmp != -1):
-                                print " - ",
-                            print str(perCent) + "%",
-                            tmp = perCent
-                        
-                        if len(chunk[:5]) >=  5:
-                            chunkLength = int(chunk[:5])
-                        else:
-                            break
-
-                        if len(chunk[5:]) >= chunkLength:
-                            data = chunk[5:5 + chunkLength]
-                            file.write(data)
-                            chunkCounter = chunkCounter + 1
-                            chunk = chunk[5 + chunkLength:]
-                        else:
-                            break
-
-                file.close()
-                print ""
-
-            sock.close() 
-
+            file = open(Util.LOCAL_PATH + sharedFile.filename, "wb")
+            
+            i = 0
+            while i < len(sharedParts):
+                file.write(sharedParts[i].data)
+                i = i + 1
+            
+            file.close()
+            
             #controllo correttezza del download
-            myMd5 = Util.Util.md5(Util.LOCAL_PATH + searchResults[choice - 1].filename)        
-            if myMd5 != searchResults[choice - 1].filemd5:
+            lenfile = os.path.getsize(Util.LOCAL_PATH + sharedFile.filename)      
+            if lenfile != sharedFile.lenfile:
                 print("Errore nel download del file, gli md5 sono diversi!")  
         else:
             print("Annullato")
