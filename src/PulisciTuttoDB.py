@@ -8,6 +8,7 @@ import DownloadPartService
 import SharedPartService
 import PeerService
 import PartService
+import ParallelDownloadService
 
 
 conn_db=Connessione.Connessione()
@@ -22,7 +23,7 @@ try:
     PeerService.PeerService.delete(conn_db.crea_cursore())
     FileService.FileService.delete(conn_db.crea_cursore())
     DownloadPeerService.DownloadPeerService.deleteDownloadPeer(conn_db.crea_cursore())
-    
+    ParallelDownloadService.ParallelDownloadService.delete(conn_db.crea_cursore())
     
     
 finally:

@@ -16,10 +16,10 @@ class Util:
     PORTTracker= 8000
     
     global USERNAME
-    USERNAME = "p2pAdmin"
+    USERNAME = "root"
     
     global PASSWORD
-    PASSWORD = "p2pAdmin"
+    PASSWORD = "lucaluca"
     
 
     global SLEEPTIME

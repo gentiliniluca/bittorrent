@@ -374,7 +374,6 @@ class Client:
         try:
             conn_db=Connessione.Connessione()
             serachResultTrue=SearchResultService.SearchResultService.getSearchResultTrue(conn_db.crea_cursore())
-            print("\tc'e download")
             stringa_da_trasmettere="FCHU"+sessionid+serachResultTrue.randomid
             sock = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
             sock.connect((Util.IPTracker, int(Util.PORTTracker)))
@@ -386,10 +385,33 @@ class Client:
             while(i<int(hitpeer)):
                 ipp2p=sock.recv(39)
                 pp2p=sock.recv(5)
-                #parte elaborazione partlist
+                print("\t\t"+ipp2p+"  "+pp2p)
+                #salva nella tabella DownloadPeer le info appena prese
+                downloadpeer=DownloadPeerService.DownloadPeerService.insertNewDownloadPeer(conn_db.crea_cursore(),ipp2p,pp2p)
+                print("\t\tinserito download peer")
+                #parte elaborazione partlist e calcolo numero di parti
+                numparti=int(serachResultTrue.lenfile)//int(serachResultTrue.lenpart)
+                if(int(serachResultTrue.lenfile) % int(serachResultTrue.lenpart)!=0):
+                    numparti= numparti+1
+                print("\t\t"+str(numparti))
+                
+                numparti_byte=numparti//8
+                if(numparti % 8!=0):
+                    numparti_byte= numparti_byte+1
+                print("\t\t"+str(numparti_byte))
+                
+                part_list=sock.recv(numparti_byte)
+                numparti_binario=bin(int(part_list))[2:]
+                print("\t\t"+str(numparti_binario)+"   "+str(part_list))
+                
+                j=len(numparti_binario)-1
+                while(j>=0):
+                    if(numparti_binario[j]=='1'):
+                        downloadpart=DownloadPartService.DownloadPart.Service.insertNewDownloadPart(conn_db.crea_cursore(), j,downloadpeer.downloadpeerid )
+                        print("\t\t inserito parte db")
+                    j=j-1
                 
                 i=i+1
-            print(stringa_ricevuta)
             sock.close()
             
         except Exception as e:
