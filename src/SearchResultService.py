@@ -52,3 +52,17 @@ class SearchResultService:
     @staticmethod
     def delete(database):
         database.execute("""DELETE FROM SearchResult""")
+        
+    
+    @staticmethod
+    def getSearchResultTrue(database):
+        
+        database.execute("""SELECT idsearchresult, randomid, filename, lenfile, lenpart, choose
+                            FROM SearchResult
+                            WHERE choose='T' """)
+        
+        idsearchresult, randomid, filename, lenfile, lenpart, choose = database.fetchone()
+        
+        searchResult = SearchResult.SearchResult(idsearchresult, randomid, filename, lenfile, lenpart, choose)
+        
+        return searchResult

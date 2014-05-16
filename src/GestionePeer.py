@@ -19,6 +19,9 @@ class GestionePeer:
                 #login
                 if(int(operazione_utente) == 1):            
                     SessionID=Client.Client.login(SessionID)
+                    out_file = open("sessionID.txt","w")
+                    out_file.write(SessionID)
+                    out_file.close()
                 
                 #carica file
                 if(int(operazione_utente) == 2):            
@@ -43,6 +46,15 @@ class GestionePeer:
         
         
         else: #gestisco funzionalita server 
+            pid2=fork()
+            if(pid2==0): #processino FCHU
+                while 1:
+                    sleep(60)
+                    in_file = open("sessionID.txt","r")
+                    sessionID = in_file.read()
+                    in_file.close()
+                    Client.Client.notificaTracker(sessionID)
+            #ancora padre server
             s = Client.Client.initServerSocket()
             while 1:
                 print("\t\t\t\t\t\t\t\t\tAttesa richiesta peer")

@@ -1,3 +1,4 @@
+
 import os.path
 import Connessione
 import random
@@ -8,6 +9,7 @@ import sys
 import os
 import SharedPartService
 import SharedFileService
+import SearchResultService
 
 
 
@@ -210,3 +212,20 @@ class Client:
         return s
         
     
+    @staticmethod
+    def notificaTracker(sessionid):
+        try:
+            conn_db=Connessione.Connessione()
+            serachResultTrue=SearchResutlService.SearchResutlService.getSearchResultTrue(conn_db.crea_cursore())
+        
+            stringa_da_trasmettere="FCHU"+sessionid+serachResultTrue.randomid
+            sock = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
+            sock.connect((Util.IPTracker, int(Util.PORTTracker)))
+            sock.send(stringa_da_trasmettere.encode())
+            sock.close()
+            
+        except Exception as e:
+            print("non ci sono download in corso")
+        finally:
+            conn_db.esegui_commit()
+            conn_db.chiudi_connessione
