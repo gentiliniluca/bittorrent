@@ -176,7 +176,7 @@ class Server:
             i=0
             while(i<len(files)):
                 sendingString=sendingString+files[i].randomid+Util.Util.aggiungi_spazi_finali(files[i].filename,100)
-                sendingString=sendingString+files[i].lenfile+files[i].lenpart
+                sendingString=sendingString+Util.Util.adattaStringa(10,files[i].lenfile)+files[i].lenpart
                 i=i+1
 
             print("\t\t\t\t\t\t\t->Restituisco: " + sendingString)
