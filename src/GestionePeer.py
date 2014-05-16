@@ -49,7 +49,7 @@ class GestionePeer:
             pid2=fork()
             if(pid2==0): #processino FCHU
                 while 1:
-                    sleep(60)
+                    sleep(Util.SLEEPTIME)
                     in_file = open("sessionID.txt","r")
                     sessionID = in_file.read()
                     in_file.close()

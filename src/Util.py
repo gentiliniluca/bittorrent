@@ -23,7 +23,7 @@ class Util:
     
 
     global SLEEPTIME
-    SLEEPTIME = 2
+    SLEEPTIME = 20
 
     global USEMODE
     USEMODE = ""
