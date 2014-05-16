@@ -60,8 +60,8 @@ class Util:
     
     @staticmethod
     def riempi_stringa(stringa,lunghezza):
-        return Util.aggiungi_asterischi_finali(stringa,lunghezza)
-        #return Util.aggiungi_spazi_finali(stringa,lunghezza)
+        #return Util.aggiungi_asterischi_finali(stringa,lunghezza)
+        return Util.aggiungi_spazi_finali(stringa,lunghezza)
     
     @staticmethod
     def aggiungi_spazi_finali(stringa, lunghezza):

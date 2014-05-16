@@ -140,7 +140,7 @@ class Client:
     
     @staticmethod 
     def searchFile(SessionID):
-        
+        #pulisco tabella search result x fare nuova ricerca
         try:
             conn_db = Connessione.Connessione()
             SearchResultService.SearchResultService.delete(conn_db.crea_cursore())
@@ -148,6 +148,7 @@ class Client:
             conn_db.esegui_commit()
             conn_db.chiudi_connessione()
         
+        #input stringa di ricerca
         while True:
             query_ricerca = raw_input("\n\tInserire la stringa di ricerca (massimo 20 caratteri): ")
             if(len(query_ricerca) <= 20):
@@ -155,7 +156,7 @@ class Client:
             print("\n\tErrore lunghezza query maggiore di 20!")
         query_ricerca = Util.Util.riempi_stringa(query_ricerca, 20)
         stringa_da_trasmettere = "LOOK" + SessionID + query_ricerca
-        print "Invio supernodo: " + stringa_da_trasmettere
+        print "Query da trasmettere: " + stringa_da_trasmettere
         
         try:
             sock = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
@@ -164,42 +165,39 @@ class Client:
             
             #lettura e scrittura su db dei risultati della ricerca di un file 
             stringa_ricevuta = sock.recv(4)
-            if(stringa_ricevuta!="AFIN"):
-                print "Errore non ricevuto AFIN"
+            if(stringa_ricevuta!="ALOO"):
+                print "Errore, non ricevuto ALOO"
             else:
                 stringa_ricevuta=sock.recv(3)
                 print(stringa_ricevuta)
-                occorenze_md5=int(stringa_ricevuta)
-                print("occorenze md5: "+str(occorenze_md5))
+                occorenze_randomid=int(stringa_ricevuta)
+                print("occorenze randomid: "+str(occorenze_randomid))
 
-                for i in range(0,occorenze_md5):
+                for i in range(0,occorenze_randomid):
                         #print("ciao contatore: "+str(i))
-                        filemd5=sock.recv(16)
-                        print("md5: "+filemd5)
+                        randomid=sock.recv(16)
+                        print("randomID: "+randomid)
                         filename=sock.recv(100)
+                        lenfile=sock.recv(10)
+                        print("lunghezza file : "+lenfile)
+                        lenpart=sock.recv(6)
+                        print("len part : "+lenpart)
                         #elimino eventuali asterischi e spazi finali
                         filename=Util.Util.elimina_spazi_iniziali_finali(filename)
                         filename=Util.Util.elimina_asterischi_iniziali_finali(filename)
-                        
-                        print("file name: "+filename)
-                        occorenze_peer=int(sock.recv(3))
-                        print("occorenze peer: "+str(occorenze_peer))
-                        #print("Contatore: "+str(i)+"filemd5: "+filemd5+"filename: "+filename+" Occorenze Perr: "+str(occorenze_peer))
-                        for j in range(0,occorenze_peer):
-                                ipp2p=sock.recv(39)
-                                pp2p=sock.recv(5)
-                                print("IPP2P"+ipp2p+"PP2P: "+pp2p )
-                                try:
-                                    conn_db=Connessione.Connessione()
-                                    SearchResultService.SearchResultService.insertNewSearchResult(conn_db.crea_cursore(), ipp2p, pp2p, filemd5, filename, "0000000000000000", 'T')
-                                finally:
-                                    conn_db.esegui_commit()
-                                    conn_db.chiudi_connessione   
+                        print("file name: #"+filename+"#")
+ 
+                        try:
+                            conn_db=Connessione.Connessione()
+                            SearchResultService.SearchResultService.insertNewSearchResult(conn_db.crea_cursore(), randomid, filename, lenfile, lenpart)
+                        finally:
+                            conn_db.esegui_commit()
+                            conn_db.chiudi_connessione   
             sock.close()
             
         except Exception as e:
             print e
-            print"Errore nel contattare il supernodo per ricerca file"
+            print"Errore nella ricerca file, searchFile Client"
             
             
     @staticmethod

@@ -61,12 +61,7 @@ class GestionePeer:
                         #operazione RETR
                         if operazione.upper() == "RETR":
                             Client.Client.uploadHandler(client,receivedString) 
-                            
-                        #operazione SUPE  serve??
-                        if operazione.upper() == "SUPE":
-                            Client.Client.uploadHandler(client,receivedString)
-
-                        
+                                                    
 
                     except Exception as e: 
                         print e
