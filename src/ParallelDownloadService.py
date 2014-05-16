@@ -33,3 +33,7 @@ class ParallelDownloadService:
         parallelDownload = ParallelDownloadService.getParallelDownload(database)
         parallelDownload.number = int(parallelDownload.number) - 1
         parallelDownload.update(database)
+        
+    @staticmethod
+    def delete(database):
+        database.execute("""DELETE FROM ParallelDownload""")

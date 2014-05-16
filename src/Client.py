@@ -340,7 +340,6 @@ class Client:
         try:
             conn_db=Connessione.Connessione()
             serachResultTrue=SearchResultService.SearchResultService.getSearchResultTrue(conn_db.crea_cursore())
-            print("\tc'e download")
             stringa_da_trasmettere="FCHU"+sessionid+serachResultTrue.randomid
             sock = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
             sock.connect((Util.IPTracker, int(Util.PORTTracker)))
