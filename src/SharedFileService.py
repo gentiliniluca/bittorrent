@@ -5,22 +5,23 @@ import random
 class SharedFileService:
     
     @staticmethod
-    def insertNewSharedFile(database, filename, lenfile, lenpart):
+    def insertNewSharedFile(database, randomid, filename, lenfile, lenpart):
         
-        #generazione randomid
-        randomid = "".join(random.choice(string.ascii_uppercase + string.digits) for _ in range(16))
-        
-        #check di unicita' randomid
-        database.execute("""SELECT randomid
-                            FROM SharedFile
-                            WHERE randomid = %s""",
-                            (randomid))
-        while database.fetchone() != None:
+        if randomid == None:
+            #generazione randomid
             randomid = "".join(random.choice(string.ascii_uppercase + string.digits) for _ in range(16))
+            
+            #check di unicita' randomid
             database.execute("""SELECT randomid
                                 FROM SharedFile
                                 WHERE randomid = %s""",
                                 (randomid))
+            while database.fetchone() != None:
+                randomid = "".join(random.choice(string.ascii_uppercase + string.digits) for _ in range(16))
+                database.execute("""SELECT randomid
+                                    FROM SharedFile
+                                    WHERE randomid = %s""",
+                                    (randomid))
         
         #inserimento nuovo sharedFile
         sharedFile = SharedFile.SharedFile(randomid, filename, lenfile, lenpart)
