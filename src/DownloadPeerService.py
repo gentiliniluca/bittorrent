@@ -34,5 +34,5 @@ class DownloadPeerService:
         return downloadPeer
      
     @staticmethod
-    def deleteDownloadPeer(self, database):        
+    def deleteDownloadPeer(database):        
         database.execute("""DELETE FROM DownloadPeer""")
