@@ -16,10 +16,10 @@ class Util:
     PORTTracker= 8000
     
     global USERNAME
-    USERNAME = "root"
+    USERNAME = "p2pAdmin"
     
     global PASSWORD
-    PASSWORD = "lucaluca"
+    PASSWORD = "p2pAdmin"
     
 
     global SLEEPTIME
@@ -31,6 +31,8 @@ class Util:
     global LENPART
     LENPART = 262144  #in byte
         
+    global PARALLELDOWNLOADS
+    PARALLELDOWNLOADS = 20
     
     
     global LOCAL_PATH #percorso file condivisi
