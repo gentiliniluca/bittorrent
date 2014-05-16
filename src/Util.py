@@ -5,12 +5,12 @@ import random
 class Util:
     
     global HOST
-    HOST = "fd00:0000:0000:0000:c5f1:81b9:ee7e:efbf"
+    HOST   =  "fd00:0000:0000:0000:e966:a9d9:ed71:3855"
     global PORT
     PORT = 3331
     
     global IPTracker
-    IPTracker="fd00:0000:0000:0000:11e0:eb58:6d93:4f05"
+    IPTracker="fd00:0000:0000:0000:1418:bbb5:a5d0:975e"
  
     global PORTTracker
     PORTTracker= 8000
@@ -23,7 +23,7 @@ class Util:
     
 
     global SLEEPTIME
-    SLEEPTIME = 20
+    SLEEPTIME = 10
 
     global USEMODE
     USEMODE = ""

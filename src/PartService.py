@@ -66,3 +66,7 @@ class PartService:
         database.execute("""DELETE FROM Part
                             WHERE Peer_sessionid = %s""",
                             sessionid ) 
+                            
+    @staticmethod
+    def delete(database):
+        database.execute("""DELETE FROM Part""")

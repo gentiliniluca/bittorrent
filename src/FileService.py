@@ -52,3 +52,7 @@ class FileService:
             pass            
             
         return files
+    
+    @staticmethod
+    def delete(database, sessionid):
+        database.execute("""DELETE FROM File""")
