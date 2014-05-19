@@ -1,4 +1,3 @@
-
 import os.path
 import Connessione
 import random
@@ -11,6 +10,7 @@ import bitarray
 import SharedPart
 import SharedPartService
 import SharedFileService
+import SearchResult
 import SearchResultService
 import DownloadPeerService
 import DownloadPartService
@@ -353,6 +353,11 @@ class Client:
                 i = i + 1
             
             file.close()
+            
+            conn_db = Connessione.Connessione()
+            SearchResultService.SearchResultService.unsetDownloadSearchResult(conn_db.crea_cursore())
+            conn_db.esegui_commit()
+            conn_db.chiudi_connessione()
             
             #controllo correttezza del download
             lenfile = os.path.getsize(Util.LOCAL_PATH + sharedFile.filename)      
