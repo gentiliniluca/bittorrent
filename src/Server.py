@@ -6,6 +6,7 @@ import string
 import sys
 import random
 import time
+import bitarray
 import Connessione
 import PartService
 import Part
@@ -227,9 +228,14 @@ class Server:
                     except Exception as e:
                         partPresence=partPresence+"0"
                     j=j+1
-                partPresence=partPresence[::-1]
-                intpartPresence=int(partPresence,2)
-                sendingString=sendingString+peers[i].ipp2p+Util.Util.adattaStringa(5,peers[i].pp2p)+str(intpartPresence)
+                #partPresence=partPresence[::-1]
+                
+                partPresenceBit=bitarray.bitarray(partPresence,endian='big')
+                
+                partPresenceByte=a.tobytes()
+                
+                
+                sendingString=sendingString+peers[i].ipp2p+Util.Util.adattaStringa(5,peers[i].pp2p)+partPresenceByte
 
                 i=i+1
 
