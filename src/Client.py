@@ -411,7 +411,7 @@ class Client:
                 j=0
                 while(j<numparti):
                     if(part_list_bit[j]==1):
-                        downloadpart=DownloadPartService.DownloadPart.Service.insertNewDownloadPart(conn_db.crea_cursore(), j, downloadpeer.downloadpeerid )
+                        downloadpart=DownloadPartService.DownloadPartService.insertNewDownloadPart(conn_db.crea_cursore(), j, downloadpeer.downloadpeerid )
                         print("\t\t inserito parte db")
                     j=j+1
                 

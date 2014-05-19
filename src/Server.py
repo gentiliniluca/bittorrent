@@ -167,12 +167,10 @@ class Server:
             #vettore dei file ottenuti dalla ricerca facendo match con la stringa
             files=[]
             files=FileService.FileService.getFiles(conn_db.crea_cursore(),searchStringClear)
-            print("OK 1")
             conn_db.esegui_commit()
             conn_db.chiudi_connessione()
 
             sendingString="ALOO"+Util.Util.adattaStringa(3,str(len(files)))
-            print("ok len files")
 
             i=0
             while(i<len(files)):
