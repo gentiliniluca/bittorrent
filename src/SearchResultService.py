@@ -65,3 +65,9 @@ class SearchResultService:
         searchResult = SearchResult.SearchResult(idsearchresult, randomid, filename, lenfile, lenpart, choose)
         
         return searchResult
+    
+    @staticmethod
+    def unsetDownloadSearchResult(database):
+        database.execute("""UPDATE SearchResult
+                            SET choose = 'F'
+                            WHERE choose = 'T'""")
