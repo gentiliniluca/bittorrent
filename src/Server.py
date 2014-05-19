@@ -232,7 +232,7 @@ class Server:
                 
                 partPresenceBit=bitarray.bitarray(partPresence,endian='big')
                 
-                partPresenceByte=a.tobytes()
+                partPresenceByte=partPresenceBit.tobytes()
                 
                 
                 sendingString=sendingString+peers[i].ipp2p+Util.Util.adattaStringa(5,peers[i].pp2p)+partPresenceByte

@@ -402,11 +402,11 @@ class Client:
                 
                 part_list=sock.recv(numparti_byte)
                
-                part_list_byte=bitarray.bitarray(endian='big')
-                part_list_bit=part_list_byte.frombytes(part_list)
+                part_list_bit=bitarray.bitarray(endian='big')
+                part_list_bit.frombytes(part_list)
                
 
-                print("\t\tnum part binario:"+str(numparti_binario)+"   part list:"+str(part_list))
+                print("\t\tnum part binario:"+str(numparti_byte)+"   part list:"+str(part_list))
                 
                 j=0
                 while(j<numparti):
