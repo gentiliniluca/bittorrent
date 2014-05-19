@@ -7,6 +7,7 @@ import string
 import Util
 import sys
 import os
+import bitarray
 import SharedPart
 import SharedPartService
 import SharedFileService
@@ -394,23 +395,25 @@ class Client:
                 numparti=int(serachResultTrue.lenfile)//int(serachResultTrue.lenpart)
                 if(int(serachResultTrue.lenfile) % int(serachResultTrue.lenpart)!=0):
                     numparti= numparti+1
-                print("\t\t"+str(numparti))
                 
                 numparti_byte=numparti//8
                 if(numparti % 8!=0):
                     numparti_byte= numparti_byte+1
-                print("\t\t"+str(numparti_byte))
                 
                 part_list=sock.recv(numparti_byte)
-                numparti_binario=bin(int(part_list))[2:]
+               
+                part_list_byte=bitarray.bitarray(endian='big')
+                part_list_bit=part_list_byte.frombytes(part_list)
+               
+
                 print("\t\tnum part binario:"+str(numparti_binario)+"   part list:"+str(part_list))
                 
-                j=len(numparti_binario)-1
-                while(j>=0):
-                    if(numparti_binario[j]=='1'):
+                j=0
+                while(j<numparti):
+                    if(part_list_bit[j]==1):
                         downloadpart=DownloadPartService.DownloadPart.Service.insertNewDownloadPart(conn_db.crea_cursore(), j, downloadpeer.downloadpeerid )
                         print("\t\t inserito parte db")
-                    j=j-1
+                    j=j+1
                 
                 i=i+1
             sock.close()
