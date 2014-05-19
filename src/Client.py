@@ -234,111 +234,208 @@ class Client:
             conn_db.esegui_commit()
             conn_db.chiudi_connessione()
             
-            conn_db = Connessione.Connessione()
-            counts = DownloadPartService.DownloadPartService.getPartCount(conn_db.crea_cursore())
-            conn_db.esegui_commit()
-            conn_db.chiudi_connessione()
+#            conn_db = Connessione.Connessione()
+#            counts = DownloadPartService.DownloadPartService.getPartCount(conn_db.crea_cursore())
+#            conn_db.esegui_commit()
+#            conn_db.chiudi_connessione()
+
+            nParts = sharedFile.lenfile // sharedFile.lenpart
+            if sharedFile.lenfile % sharedFile.lenpart != 0:
+                nParts = nParts + 1             
             
             i = 0
-            while i < len(counts):
-                j = 0
-                while j < len(counts[i]):
-                    conn_db = Connessione.Connessione()
-                    parallelDownload = ParallelDownloadService.ParallelDownloadService.getParallelDownload(conn_db.crea_cursore())
-                    conn_db.esegui_commit()
-                    conn_db.chiudi_connessione()
+            while i < nParts:
+                #recupero numero di parte da scaricare casualmente tra quelle che ancora non ho
+                conn_db = Connessione.Connessione()
+                downloadpartid = DownloadPartService.DownloadPartService.getRandomPart(conn_db.crea_cursore(), sharedFile.randomid)
+                conn_db.esegui_commit()
+                conn_db.chiudi_connessione()
+                
+                conn_db = Connessione.Connessione()
+                downloadPeer = DownloadPeerService.DownloadPeerService.getDownloadPeer(conn_db.crea_cursore(), downloadpartid)
+                conn_db.esegui_commit()
+                conn_db.chiudi_connessione()
+                
+                conn_db = Connessione.Connessione()
+                parallelDownload = ParallelDownloadService.ParallelDownloadService.getParallelDownload(conn_db.crea_cursore())
+                conn_db.esegui_commit()
+                conn_db.chiudi_connessione()
+                
+                if parallelDownload.number < Util.PARALLELDOWNLOADS:
+                    newpid = os.fork()
                     
-                    if parallelDownload.number < Util.PARALLELDOWNLOADS:
-                        newpid = os.fork()
-                    
-                        if newpid == 0:
+                    if newpid == 0:
+                        conn_db = Connessione.Connessione()
+                        ParallelDownloadService.ParallelDownloadService.increase(conn_db.crea_cursore())
+                        conn_db.esegui_commit()
+                        conn_db.chiudi_connessione()                    
                             
+                        sock = socket.socket(socket.AF_INET6, socket.SOCK_STREAM) 
+                        sock.connect((downloadPeer.ipp2p, int(downloadPeer.pp2p)))
+                        sendingString = "RETP" + searchResults[choice - 1].randomid + Util.adattaStringa(8, downloadpartid)
+                        #sock.send(sendingString.encode())
+                        sock.send(sendingString)
+                        
+                        receivedString = sock.recv(10)       
+                        if receivedString[0:4].decode() == "AREP":
+                            nChunk = int(receivedString[4:10].decode())            
+                            chunk = bytes()
+                            chunkCounter = 0
+            
+                            #file = open(Util.LOCAL_PATH + searchResults[choice - 1].filename, "wb")
+                            sharedPart = SharedPart.SharedPart(downloadpartid, "", sharedFile.randomid)
+                            
+                            #inizializzo la variabile temporanea per stampre la percentuale
+                            tmp = -1
+                            print "\nDownloading...\t",
+                            
+                            while chunkCounter < nChunk:
+                                receivedString = sock.recv(1024)
+                                chunk = chunk + receivedString                
+            
+                                while True:
+                                    
+                                    #Un po' di piacere per gli occhi...
+                                    perCent = chunkCounter*100//nChunk
+                                    if(perCent % 10 == 0 and tmp != perCent):
+                                        if(tmp != -1):
+                                            print " - ",
+                                        print str(perCent) + "%",
+                                        tmp = perCent
+                                    
+                                    if len(chunk[:5]) >=  5:
+                                        chunkLength = int(chunk[:5])
+                                    else:
+                                        break
+            
+                                    if len(chunk[5:]) >= chunkLength:
+                                        data = chunk[5:5 + chunkLength]
+                                        #file.write(data)
+                                        sharedPart.data = sharedPart.data + data
+                                        chunkCounter = chunkCounter + 1
+                                        chunk = chunk[5 + chunkLength:]
+                                    else:
+                                        break
+            
+                            #file.close()
                             conn_db = Connessione.Connessione()
-                            ParallelDownloadService.ParallelDownloadService.increase(conn_db.crea_cursore())
+                            sharedPart.insert(conn_db.crea_cursore())
                             conn_db.esegui_commit()
                             conn_db.chiudi_connessione()
-                            
-                            try:
-                                conn_db = Connessione.Connessione()
-                                sharedPart = SharedPartService.SharedPartService.getSharedPart(conn_db.crea_cursore(), searchResults[choice - 1].randomid, counts[i][j])
-                                conn_db.esegui_commit()
-                                conn_db.chiudi_connessione()
-                                
-                            except:
-                                
-                                conn_db = Connessione.Connessione()
-                                downloadPeer = DownloadPeerService.DownloadPeerService.getDownloadPeer(conn_db.crea_cursore(), counts[i][j])
-                                conn_db.esegui_commit()
-                                conn_db.chiudi_connessione()
-                                
-                                sock = socket.socket(socket.AF_INET6, socket.SOCK_STREAM) 
-                                sock.connect((downloadPeer.ipp2p, int(downloadPeer.pp2p)))
-                                sendingString = "RETP" + searchResults[choice - 1].randomid + Util.adattaStringa(8, counts[i][j])
-                                #sock.send(sendingString.encode())
-                                sock.send(sendingString)
-                                
-                                receivedString = sock.recv(10)       
-                                if receivedString[0:4].decode() == "AREP":
-                                    nChunk = int(receivedString[4:10].decode())            
-                                    chunk = bytes()
-                                    chunkCounter = 0
+                            print ""                    
                     
-                                    #file = open(Util.LOCAL_PATH + searchResults[choice - 1].filename, "wb")
-                                    sharedPart = SharedPart.SharedPart(counts[i][j], "", sharedFile.randomid)
-                                    
-                                    #inizializzo la variabile temporanea per stampre la percentuale
-                                    tmp = -1
-                                    print "\nDownloading...\t",
-                                    
-                                    while chunkCounter < nChunk:
-                                        receivedString = sock.recv(1024)
-                                        chunk = chunk + receivedString                
-                    
-                                        while True:
-                                            
-                                            #Un po' di piacere per gli occhi...
-                                            perCent = chunkCounter*100//nChunk
-                                            if(perCent % 10 == 0 and tmp != perCent):
-                                                if(tmp != -1):
-                                                    print " - ",
-                                                print str(perCent) + "%",
-                                                tmp = perCent
-                                            
-                                            if len(chunk[:5]) >=  5:
-                                                chunkLength = int(chunk[:5])
-                                            else:
-                                                break
-                    
-                                            if len(chunk[5:]) >= chunkLength:
-                                                data = chunk[5:5 + chunkLength]
-                                                #file.write(data)
-                                                sharedPart.data = sharedPart.data + data
-                                                chunkCounter = chunkCounter + 1
-                                                chunk = chunk[5 + chunkLength:]
-                                            else:
-                                                break
-                    
-                                    #file.close()
-                                    conn_db = Connessione.Connessione()
-                                    sharedPart.insert(conn_db.crea_cursore())
-                                    conn_db.esegui_commit()
-                                    conn_db.chiudi_connessione()
-                                    print ""
-                            
-                            finally:
-                                conn_db = Connessione.Connessione()
-                                ParallelDownloadService.ParallelDownloadService.decrease(conn_db.crea_cursore())
-                                conn_db.esegui_commit()
-                                conn_db.chiudi_connessione()
-                                
-                                os._exit(0)
+                        conn_db = Connessione.Connessione()
+                        ParallelDownloadService.ParallelDownloadService.decrease(conn_db.crea_cursore())
+                        conn_db.esegui_commit()
+                        conn_db.chiudi_connessione()
                         
-                        else:
-                            j = j + 1
+                        os._exit(0)
                     
-                    # Ipotizzare presenza wait
-                
-                i = i + 1
+                    else:
+                        #il figlio ha correttamente scaricato la parte
+                        i = i + 1
+                                                                     
+            
+#            i = 0
+#            while i < len(counts):
+#                j = 0
+#                while j < len(counts[i]):
+#                    conn_db = Connessione.Connessione()
+#                    parallelDownload = ParallelDownloadService.ParallelDownloadService.getParallelDownload(conn_db.crea_cursore())
+#                    conn_db.esegui_commit()
+#                    conn_db.chiudi_connessione()
+#                    
+#                    if parallelDownload.number < Util.PARALLELDOWNLOADS:
+#                        newpid = os.fork()
+#                    
+#                        if newpid == 0:
+#                            
+#                            conn_db = Connessione.Connessione()
+#                            ParallelDownloadService.ParallelDownloadService.increase(conn_db.crea_cursore())
+#                            conn_db.esegui_commit()
+#                            conn_db.chiudi_connessione()
+#                            
+#                            try:
+#                                conn_db = Connessione.Connessione()
+#                                sharedPart = SharedPartService.SharedPartService.getSharedPart(conn_db.crea_cursore(), searchResults[choice - 1].randomid, counts[i][j])
+#                                conn_db.esegui_commit()
+#                                conn_db.chiudi_connessione()
+#                                
+#                            except:
+#                                
+#                                conn_db = Connessione.Connessione()
+#                                downloadPeer = DownloadPeerService.DownloadPeerService.getDownloadPeer(conn_db.crea_cursore(), counts[i][j])
+#                               conn_db.esegui_commit()
+#                                conn_db.chiudi_connessione()
+#                               
+#                                sock = socket.socket(socket.AF_INET6, socket.SOCK_STREAM) 
+#                                sock.connect((downloadPeer.ipp2p, int(downloadPeer.pp2p)))
+#                                sendingString = "RETP" + searchResults[choice - 1].randomid + Util.adattaStringa(8, counts[i][j])
+#                                #sock.send(sendingString.encode())
+#                                sock.send(sendingString)
+#                                
+#                                receivedString = sock.recv(10)       
+#                                if receivedString[0:4].decode() == "AREP":
+#                                    nChunk = int(receivedString[4:10].decode())            
+#                                    chunk = bytes()
+#                                    chunkCounter = 0
+#                   
+#                                    #file = open(Util.LOCAL_PATH + searchResults[choice - 1].filename, "wb")
+#                                    sharedPart = SharedPart.SharedPart(counts[i][j], "", sharedFile.randomid)
+#                                    
+#                                    #inizializzo la variabile temporanea per stampre la percentuale
+#                                    tmp = -1
+#                                    print "\nDownloading...\t",
+#                                    
+#                                    while chunkCounter < nChunk:
+#                                        receivedString = sock.recv(1024)
+#                                        chunk = chunk + receivedString                
+#                    
+#                                        while True:
+#                                            
+#                                            #Un po' di piacere per gli occhi...
+#                                            perCent = chunkCounter*100//nChunk
+#                                            if(perCent % 10 == 0 and tmp != perCent):
+#                                                if(tmp != -1):
+#                                                    print " - ",
+#                                                print str(perCent) + "%",
+#                                                tmp = perCent
+#                                            
+#                                            if len(chunk[:5]) >=  5:
+#                                                chunkLength = int(chunk[:5])
+#                                            else:
+#                                                break
+#                    
+#                                            if len(chunk[5:]) >= chunkLength:
+#                                                data = chunk[5:5 + chunkLength]
+#                                                #file.write(data)
+#                                                sharedPart.data = sharedPart.data + data
+#                                                chunkCounter = chunkCounter + 1
+#                                                chunk = chunk[5 + chunkLength:]
+#                                            else:
+#                                                break
+#                    
+#                                    #file.close()
+#                                    conn_db = Connessione.Connessione()
+#                                    sharedPart.insert(conn_db.crea_cursore())
+#                                    conn_db.esegui_commit()
+#                                    conn_db.chiudi_connessione()
+#                                    print ""
+#                            
+#                            finally:
+#                                conn_db = Connessione.Connessione()
+#                                ParallelDownloadService.ParallelDownloadService.decrease(conn_db.crea_cursore())
+#                                conn_db.esegui_commit()
+#                                conn_db.chiudi_connessione()
+#                                
+#                                os._exit(0)
+#                        
+#                        else:
+#                            j = j + 1
+#                    
+#                    # Ipotizzare presenza wait
+#                
+#               i = i + 1
             
             conn_db = Connessione.Connessione()
             sharedParts = SharedPartService.SharedPartService.getSharedParts(conn_db.crea_cursore(), sharedFile.randomid)

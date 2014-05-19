@@ -36,4 +36,18 @@ class DownloadPartService:
      
     @staticmethod
     def deleteParts(database):
-        database.execute("""DELETE FROM Part""")  
+        database.execute("""DELETE FROM Part""")
+        
+    @staticmethod
+    def getRandomPart(database, randomid):  
+        database.execute("""SELECT downloadpartid, count(*) as counter
+                            FROM DownloadPart
+                            WHERE downloadpartid NOT IN (SELECT downloadpartid 
+                                                         FROM SharedPart
+                                                         WHERE SharedFile_randomid = %s)
+                            GROUP BY downloadpartid
+                            ORDER BY counter""", randomid)
+        
+        partid, = database.fetchone()
+        
+        return partid
