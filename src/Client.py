@@ -382,7 +382,7 @@ class Client:
             conn_db=Connessione.Connessione()
             serachResultTrue=SearchResultService.SearchResultService.getSearchResultTrue(conn_db.crea_cursore())
             conn_db.esegui_commit()
-            conn_db.chiudi_connessione
+            conn_db.chiudi_connessione()
             stringa_da_trasmettere="FCHU"+sessionid+serachResultTrue.randomid
             sock = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
             sock.connect((Util.IPTracker, int(Util.PORTTracker)))
@@ -399,7 +399,7 @@ class Client:
                 #salva nella tabella DownloadPeer le info appena prese
                 downloadpeer=DownloadPeerService.DownloadPeerService.insertNewDownloadPeer(conn_db.crea_cursore(),ipp2p,pp2p)
                 conn_db.esegui_commit()
-                conn_db.chiudi_connessione
+                conn_db.chiudi_connessione()
                 print("\t\tinserito download peer")
                 #parte elaborazione partlist e calcolo numero di parti
                 numparti=int(serachResultTrue.lenfile)//int(serachResultTrue.lenpart)
@@ -424,7 +424,7 @@ class Client:
                         conn_db=Connessione.Connessione()
                         downloadpart=DownloadPartService.DownloadPartService.insertNewDownloadPart(conn_db.crea_cursore(), j, downloadpeer.downloadpeerid )
                         conn_db.esegui_commit()
-                        conn_db.chiudi_connessione
+                        conn_db.chiudi_connessione()
                         print("\t\t inserito parte db")
                     j=j+1
                 
