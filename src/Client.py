@@ -548,7 +548,7 @@ class Client:
         
         chunkLength = 1024
         randomid = stringa_ricevuta_server[4:20]
-        partid = stringa_ricevuta_server[20:28]
+        partid = stringa_ricevuta_server[20:28].lstrip("0")
         
         try:
             conn_db = Connessione.Connessione()
