@@ -543,7 +543,7 @@ class Client:
                 
                 i=i+1
             sock.close()
-            
+            print("Aggiornata lista download")
         except Exception as e:
             print(e)
             print("non ci sono download in corso")
