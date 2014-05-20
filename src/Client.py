@@ -506,12 +506,12 @@ class Client:
                 
                 #ricavo info del peer inserito
                 conn_db=Connessione.Connessione()
-                downloadpeer=DownloadPeerService.DownloadPeerService.getPeerfromIp(conn_db.crea_cursore(),ipp2p)
+                downloadpeer=DownloadPeerService.DownloadPeerService.getPeerfromIp(conn_db.crea_cursore(),ipp2p,pp2p)
                 conn_db.esegui_commit()
                 conn_db.chiudi_connessione()
                 
                 print("\t\tinserito download peer")
-                #parte elaborazione partlist e calcolo numero di parti
+                #parte calcolo numero di parti ed elaborazione partlist
                 numparti=int(serachResultTrue.lenfile)//int(serachResultTrue.lenpart)
                 if(int(serachResultTrue.lenfile) % int(serachResultTrue.lenpart)!=0):
                     numparti= numparti+1
@@ -520,7 +520,7 @@ class Client:
                 if(numparti % 8!=0):
                     numparti_byte= numparti_byte+1
                 
-                #lettura e formattazione della 
+                #lettura e formattazione della partlist
                 part_list=sock.recv(numparti_byte)
                 part_list_bit=bitarray.bitarray(endian='big')
                 part_list_bit.frombytes(part_list)
