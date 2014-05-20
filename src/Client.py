@@ -541,6 +541,54 @@ class Client:
                 print("Errore nel download del file!")  
         else:
             print("Annullato")
+    
+    #upload
+    @staticmethod
+    def uploadHandler(client, stringa_ricevuta_server):
+        
+        chunkLength = 1024
+        randomid = stringa_ricevuta_server[4:20]
+        partid = stringa_ricevuta_server[20:28]
+        
+        try:
+            conn_db = Connessione.Connessione()
+            sharedPart = SharedPartService.SharedPartService.getSharedPart(conn_db.crea_cursore(), randomid, partid)
+            conn_db.esegui_commit()
+            conn_db.chiudi_connessione()
+
+            if len(sharedPart.data) % chunkLength == 0:
+                nChunk = len(sharedPart.data) // chunkLength
+            else:
+                nChunk = (len(sharedPart.data) // chunkLength) + 1
+            
+            nChunk = str(nChunk).zfill(6)
+            sendingString = "AREP".encode()
+            sendingString = sendingString + nChunk.encode()
+            
+            i = 0
+            while True:
+                chunk = sharedPart.data[i:i+chunkLength]
+                if len(chunk) == chunkLength:
+                    sendingString = sendingString + str(chunkLength).zfill(5).encode()
+                    sendingString = sendingString + chunk
+                else:
+                    sendingString = sendingString + str(len(chunk)).zfill(5).encode()
+                    sendingString = sendingString + chunk
+                    break
+                i = i + chunkLength
+            
+#            while True:
+#                m = sendingString[:1024] 
+#                i = i+1               
+#                client.send(m)                    
+#                if len(m) < 1024:
+#                    break
+#                sendingString = sendingString[1024:]
+            client.sendall(sendingString)
+            
+        except:
+            print sys.exc_info()
+            print("Part not found!")
             
     @staticmethod
     def initServerSocket():

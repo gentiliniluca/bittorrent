@@ -81,8 +81,8 @@ class GestionePeer:
                             if operazione == "":
                                 break
 
-                            #operazione RETR
-                            if operazione.upper() == "RETR":
+                            #operazione RETP
+                            if operazione.upper() == "RETP":
                                 Client.Client.uploadHandler(client,receivedString) 
 
 
