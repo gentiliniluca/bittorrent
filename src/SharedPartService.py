@@ -4,11 +4,13 @@ class SharedPartService:
         
     @staticmethod
     def insertNewSharedPart(database, partid, data, SharedFile_randomid):       
-        try:
-            sharedPart = SharedPart.SharedPart(partid, data, SharedFile_randomid)            
+        sharedPart = SharedPart.SharedPart(partid, data, SharedFile_randomid)
+        try:                        
             sharedPart.insert(database)
         except:
             pass
+        
+        return sharedPart
     
     @staticmethod
     def getSharedPart(database, randomid, partid):

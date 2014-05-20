@@ -6,6 +6,7 @@ import string
 import Util
 import sys
 import os
+import time
 import bitarray
 import SharedPart
 import SharedPartService
@@ -207,8 +208,9 @@ class Client:
             print"Errore nella ricerca file, searchFile Client"
             
     @staticmethod
-    def downloadFile():
+    def downloadFile(sessionid):
         
+        #lettura e stampa dei risultati della ricerca
         conn_db = Connessione.Connessione()
         searchResults = SearchResultService.SearchResultService.getSearchResults(conn_db.crea_cursore())
         conn_db.esegui_commit()
@@ -224,11 +226,13 @@ class Client:
         
         if(choice > 0):
             
+            #selezione del file di cui recuperare le informazioni sullo stato di condivisione delle parti
             conn_db = Connessione.Connessione()
             searchResults[choice - 1].setDownloadSearchResult(conn_db.crea_cursore())
             conn_db.esegui_commit()
             conn_db.chiudi_connessione()
             
+            #inserimento sulla tabella SharedFile del file che sta per essere scaricato
             conn_db = Connessione.Connessione()
             sharedFile = SharedFileService.SharedFileService.insertNewSharedFile(conn_db.crea_cursore(), searchResults[choice - 1].randomid, searchResults[choice - 1].filename, searchResults[choice - 1].lenfile, searchResults[choice - 1].lenpart)
             conn_db.esegui_commit()
@@ -238,38 +242,69 @@ class Client:
 #            counts = DownloadPartService.DownloadPartService.getPartCount(conn_db.crea_cursore())
 #            conn_db.esegui_commit()
 #            conn_db.chiudi_connessione()
+            
+            #calcolo del numero di parti finora scaricate
+            conn_db = Connessione.Connessione()
+            sharedParts = SharedPartService.SharedPartService.getSharedParts(conn_db.crea_cursore(), sharedFile.randomid)
+            conn_db.esegui_commit()
+            conn_db.chiudi_connessione()
 
+            #calcolo del nuumero di parti totali da scaricare
             nParts = sharedFile.lenfile // sharedFile.lenpart
             if sharedFile.lenfile % sharedFile.lenpart != 0:
-                nParts = nParts + 1             
+                nParts = nParts + 1   
             
-            i = 0
-            while i < nParts:
-                #recupero numero di parte da scaricare casualmente tra quelle che ancora non ho
-                conn_db = Connessione.Connessione()
-                downloadpartid = DownloadPartService.DownloadPartService.getRandomPart(conn_db.crea_cursore(), sharedFile.randomid)
-                conn_db.esegui_commit()
-                conn_db.chiudi_connessione()
+            while len(sharedParts) < nParts:               
+                print "In attesa di risultati ",
+                presence = False
+                while not presence:
+                    try:
+                        #recupero numero di parte da scaricare casualmente tra quelle che ancora non ho scaricato
+                        conn_db = Connessione.Connessione()
+                        downloadpartid = DownloadPartService.DownloadPartService.getRandomPart(conn_db.crea_cursore(), sharedFile.randomid)
+                        conn_db.esegui_commit()
+                        conn_db.chiudi_connessione()
+                        presence = True
+                    except:
+                        #se il processo di aggiornamento dello stato delle parti non ha ancora prodotto risultati
+                        #si attende un secondo e si ritenta la lettura
+                        print ".",
+                        time.sleep(1)
+                print ""
                 
+                #recupero le informazioni del peer da cui scaricare
                 conn_db = Connessione.Connessione()
                 downloadPeer = DownloadPeerService.DownloadPeerService.getDownloadPeer(conn_db.crea_cursore(), downloadpartid)
                 conn_db.esegui_commit()
                 conn_db.chiudi_connessione()
                 
+                #se il numero di download paralleli attivi è inferiore al numero massimo si genera un processo figlio
+                #che si occupa dello scaricamento 
                 conn_db = Connessione.Connessione()
                 parallelDownload = ParallelDownloadService.ParallelDownloadService.getParallelDownload(conn_db.crea_cursore())
                 conn_db.esegui_commit()
                 conn_db.chiudi_connessione()
                 
                 if parallelDownload.number < Util.PARALLELDOWNLOADS:
+                    
+                    #il padre inserisce la parte sulla tabella SharedPart lasciando vuoto il campo dedicato ai dati
+                    #che sarà riempito dal figlio
+                    conn_db = Connessione.Connessione()
+                    sharedPart = SharedPartService.SharedPartService.insertNewSharedPart(conn_db.crea_cursore(), downloadpartid, None, sharedFile.randomid)
+                    conn_db.esegui_commit()
+                    conn_db.chiudi_connessione()
+                    
                     newpid = os.fork()
                     
+                    #processo figlio per download
                     if newpid == 0:
+                        #incrementa il numero di download paralleli attivi
                         conn_db = Connessione.Connessione()
                         ParallelDownloadService.ParallelDownloadService.increase(conn_db.crea_cursore())
                         conn_db.esegui_commit()
                         conn_db.chiudi_connessione()                    
-                            
+                        
+                        #si connette al peer da cui scaricherà la parte    
                         sock = socket.socket(socket.AF_INET6, socket.SOCK_STREAM) 
                         sock.connect((downloadPeer.ipp2p, int(downloadPeer.pp2p)))
                         sendingString = "RETP" + searchResults[choice - 1].randomid + Util.adattaStringa(8, downloadpartid)
@@ -282,8 +317,7 @@ class Client:
                             chunk = bytes()
                             chunkCounter = 0
             
-                            #file = open(Util.LOCAL_PATH + searchResults[choice - 1].filename, "wb")
-                            sharedPart = SharedPart.SharedPart(downloadpartid, "", sharedFile.randomid)
+                            #file = open(Util.LOCAL_PATH + searchResults[choice - 1].filename, "wb")                            
                             
                             #inizializzo la variabile temporanea per stampre la percentuale
                             tmp = -1
@@ -318,12 +352,35 @@ class Client:
                                         break
             
                             #file.close()
+                            
+                            #una volta recuperati tutti i dati della parte li inserisco nel campo prima lasciato vuoto
                             conn_db = Connessione.Connessione()
-                            sharedPart.insert(conn_db.crea_cursore())
+                            sharedPart.update(conn_db.crea_cursore())
                             conn_db.esegui_commit()
                             conn_db.chiudi_connessione()
-                            print ""                    
-                    
+                            print "" 
+                            
+                            #notifica al tracker del completamento del download della parte
+                            sock = socket.socket(socket.AF_INET6, socket.SOCK_STREAM) 
+                            sock.connect((Util.IPTracker, int(Util.PORTTracker)))
+                            sendingString = "RPAD" + sessionid + searchResults[choice - 1].randomid + Util.adattaStringa(8, downloadpartid)  
+                            sock.send(sendingString)
+                            
+                            receivedString = sock.recv(12)
+                            if receivedString[0:4] == "APAD":
+                                numPart = receivedString[4:12]
+                                print "Numero di parti condivise sulla rete: " + numPart 
+                        
+                        else:
+                            #nel caso in cui il download non vada a buon fine si elimina la parte 
+                            #precedentemente inserita sul db
+                            
+                            conn_db = Connessione.Connessione()
+                            sharedPart.delete(conn_db.crea_cursore())
+                            conn_db.esegui_commit()
+                            conn_db.chiudi_connessione()               
+                        
+                        #al termine dell'esecuzione il figlio decrementa il numero di download paralleli attivi
                         conn_db = Connessione.Connessione()
                         ParallelDownloadService.ParallelDownloadService.decrease(conn_db.crea_cursore())
                         conn_db.esegui_commit()
@@ -332,9 +389,11 @@ class Client:
                         os._exit(0)
                     
                     else:
-                        #il figlio ha correttamente scaricato la parte
-                        i = i + 1
-                                                                     
+                        #si aggiorna il numero di parti finora scaricate e si ripete il ciclo finchè non si sono scaricate tutte                       
+                        conn_db = Connessione.Connessione()
+                        sharedParts = SharedPartService.SharedPartService.getSharedParts(conn_db.crea_cursore(), sharedFile.randomid)
+                        conn_db.esegui_commit()
+                        conn_db.chiudi_connessione()                                             
             
 #            i = 0
 #            while i < len(counts):
@@ -437,6 +496,7 @@ class Client:
 #                
 #               i = i + 1
             
+            #si hanno ora tutte le parti del file: si recuperano i dati di ciascuna di esse dal db e si scrive tutto su file
             conn_db = Connessione.Connessione()
             sharedParts = SharedPartService.SharedPartService.getSharedParts(conn_db.crea_cursore(), sharedFile.randomid)
             conn_db.esegui_commit()
@@ -451,15 +511,17 @@ class Client:
             
             file.close()
             
+            #termina la procedura: si toglie il marcatore che serviva per l'aggiornamento dello stato delle parti
+            #perchè non serve più
             conn_db = Connessione.Connessione()
             SearchResultService.SearchResultService.unsetDownloadSearchResult(conn_db.crea_cursore())
             conn_db.esegui_commit()
             conn_db.chiudi_connessione()
             
-            #controllo correttezza del download
+            #controllo correttezza del download verificando la lunghezza del file
             lenfile = os.path.getsize(Util.LOCAL_PATH + sharedFile.filename)      
             if lenfile != sharedFile.lenfile:
-                print("Errore nel download del file, gli md5 sono diversi!")  
+                print("Errore nel download del file!")  
         else:
             print("Annullato")
             
