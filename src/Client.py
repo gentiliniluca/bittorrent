@@ -92,6 +92,16 @@ class Client:
                 print "Errore logout"
         return returnString
     
+    @staticmethod
+    def readSocket(clientSocket):
+        
+        stringa_ricevuta_server = clientSocket.recv(SIZE)        
+        if stringa_ricevuta_server == "":
+            print("\t\t\t\t\t\tSocket vuota")
+        else:      
+            print("\t\t\t\t\t\tPacchetto ricevuto: " + stringa_ricevuta_server)
+        return stringa_ricevuta_server
+    
     
     @staticmethod
     def addFile(SessionID):
@@ -544,14 +554,14 @@ class Client:
     
     @staticmethod
     def notificaTracker(sessionid):
+        conn_db = Connessione.Connessione()
         try:
             #mi ricavo info sul risultato del file che sto scaricando
-            conn_db=Connessione.Connessione()
-            serachResultTrue=SearchResultService.SearchResultService.getSearchResultTrue(conn_db.crea_cursore())
-            conn_db.esegui_commit()
-            conn_db.chiudi_connessione()
+            serachResultTrue = SearchResultService.SearchResultService.getSearchResultTrue(conn_db.crea_cursore())
+            #conn_db.esegui_commit()
+            #conn_db.chiudi_connessione()
             #invio richiesta al tracker
-            stringa_da_trasmettere="FCHU"+sessionid+serachResultTrue.randomid
+            stringa_da_trasmettere = "FCHU" + sessionid + serachResultTrue.randomid
             sock = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
             sock.connect((Util.IPTracker, int(Util.PORTTracker)))
             sock.send(stringa_da_trasmettere.encode())
@@ -559,61 +569,69 @@ class Client:
             #ricevo risposta
             stringa_ricevuta = sock.recv(4)
             hitpeer = sock.recv(3)
-            i=0
+            i = 0
             
             #pulizia db DownloadPeer DownloadPart
-            conn_db=Connessione.Connessione()
+            #conn_db=Connessione.Connessione()
             DownloadPartService.DownloadPartService.deleteParts(conn_db.crea_cursore())
             DownloadPeerService.DownloadPeerService.deleteDownloadPeer(conn_db.crea_cursore())
-            conn_db.esegui_commit()
-            conn_db.chiudi_connessione()
+            #conn_db.esegui_commit()
+            #conn_db.chiudi_connessione()
             
             
-            while(i<int(hitpeer)):
-                ipp2p=sock.recv(39)
-                pp2p=sock.recv(5)
-                print("\t\t"+ipp2p+"  "+pp2p)
+            while(i < int(hitpeer)):
+                ipp2p = sock.recv(39)
+                pp2p = sock.recv(5)
+                print("\t\t" + ipp2p + "  " + pp2p)
                 
                 #salva nella tabella DownloadPeer le info appena prese del peer, 
                 #attenzione non restituisce nessuna informazione del peer appena inserito
-                conn_db=Connessione.Connessione()
-                downloadpeer=DownloadPeerService.DownloadPeerService.insertNewDownloadPeer(conn_db.crea_cursore(),ipp2p,pp2p)
-                conn_db.esegui_commit()
-                conn_db.chiudi_connessione()
+                #conn_db=Connessione.Connessione()
+                downloadpeer = DownloadPeerService.DownloadPeerService.insertNewDownloadPeer(conn_db.crea_cursore(), ipp2p, pp2p)
+                #conn_db.esegui_commit()
+                #conn_db.chiudi_connessione()
                 
                 #ricavo info del peer inserito
-                conn_db=Connessione.Connessione()
-                downloadpeer=DownloadPeerService.DownloadPeerService.getPeerfromIp(conn_db.crea_cursore(),ipp2p,pp2p)
-                conn_db.esegui_commit()
-                conn_db.chiudi_connessione()
+                #conn_db=Connessione.Connessione()
+                downloadpeer = DownloadPeerService.DownloadPeerService.getPeerfromIp(conn_db.crea_cursore(), ipp2p, pp2p)
+                #conn_db.esegui_commit()
+                #conn_db.chiudi_connessione()
                 
                 #parte calcolo numero di parti ed elaborazione partlist
-                numparti=int(serachResultTrue.lenfile)//int(serachResultTrue.lenpart)
-                if(int(serachResultTrue.lenfile) % int(serachResultTrue.lenpart)!=0):
-                    numparti= numparti+1
+                numparti = int(serachResultTrue.lenfile) // int(serachResultTrue.lenpart)
+                if(int(serachResultTrue.lenfile) % int(serachResultTrue.lenpart) != 0):
+                    numparti = numparti + 1
                 
-                numparti_byte=numparti//8
-                if(numparti % 8!=0):
-                    numparti_byte= numparti_byte+1
+                numparti_byte = numparti // 8
+                if(numparti % 8 != 0):
+                    numparti_byte = numparti_byte + 1
                 
                 #lettura e formattazione della partlist
-                part_list=sock.recv(numparti_byte)
-                part_list_bit=bitarray.bitarray(endian='big')
+                part_list = sock.recv(numparti_byte)
+                part_list_bit = bitarray.bitarray(endian = 'big')
                 part_list_bit.frombytes(part_list)
                                
-                j=0
-                while(j<numparti):
-                    if(part_list_bit[j]==1):
-                        conn_db=Connessione.Connessione()
-                        downloadpart=DownloadPartService.DownloadPartService.insertNewDownloadPart(conn_db.crea_cursore(), j, downloadpeer.downloadpeerid )
-                        conn_db.esegui_commit()
-                        conn_db.chiudi_connessione()
-                    j=j+1
+                j = 0
+                while(j < numparti):
+                    if(part_list_bit[j] == 1):
+                        #conn_db = Connessione.Connessione()
+                        downloadpart = DownloadPartService.DownloadPartService.insertNewDownloadPart(conn_db.crea_cursore(), j, downloadpeer.downloadpeerid)
+                        #conn_db.esegui_commit()
+                        #conn_db.chiudi_connessione()
+                    j = j + 1
                 
-                i=i+1
+                i = i + 1
             sock.close()
+            
+            conn_db.esegui_commit()
+            
             print("Aggiornata lista download")
+            
         except Exception as e:
             #print(e)
+            conn_db.db.rollback()
             print("non ci sono download in corso")
+        
+        finally:
+            conn_db.chiudi_connessione()
             

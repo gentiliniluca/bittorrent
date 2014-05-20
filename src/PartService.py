@@ -53,13 +53,13 @@ class PartService:
                              (sessionid, sessionid))
         parts = []
         
-        while True:
-            try:
+        try:
+            while True:
                 randomid, partid = database.fetchone()
                 part = Part.Part(None, randomid, partid)
                 parts.append(part)
-            except:
-                pass
+        except:
+            pass
         
         return parts
     

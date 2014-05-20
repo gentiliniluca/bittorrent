@@ -42,7 +42,7 @@ class DownloadPartService:
     def getRandomPart(database, randomid):  
         database.execute("""SELECT downloadpartid, count(*) as counter
                             FROM DownloadPart
-                            WHERE downloadpartid NOT IN (SELECT downloadpartid 
+                            WHERE downloadpartid NOT IN (SELECT partid 
                                                          FROM SharedPart
                                                          WHERE SharedFile_randomid = %s)
                             GROUP BY downloadpartid
