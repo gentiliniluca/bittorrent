@@ -19,11 +19,11 @@ class DownloadPeerService:
         return downloadPeer
     
     @staticmethod
-    def getPeerfromIp(database, ipp2p):
+    def getPeerfromIp(database, ipp2p,pp2p):
         database.execute("""SELECT downloadpeerid, ipp2p, pp2p
                             FROM DownloadPeer
-                            WHERE ipp2p = %s""",
-                            ipp2p)
+                            WHERE ipp2p = %s AND pp2p = %s""",
+                            (ipp2p,pp2p))
         downloadpeerid, ipp2p, pp2p = database.fetchone()
         downloadPeer = DownalodPeer.DownloadPeer(dowanladpeerid, ipp2p, pp2p)
         return downloadPeer
