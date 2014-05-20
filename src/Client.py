@@ -495,7 +495,7 @@ class Client:
             #pulizia db DownloadPeer DownloadPart
             conn_db=Connessione.Connessione()
             DownloadPartService.DownloadPartService.deleteParts(conn_db.crea_cursore())
-            DownloadPeerService.DownloadPeerService.DownloadPeerService(conn_db.crea_cursore())
+            DownloadPeerService.DownloadPeerService.deleteDownloadPeer(conn_db.crea_cursore())
             conn_db.esegui_commit()
             conn_db.chiudi_connessione()
             
