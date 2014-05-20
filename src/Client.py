@@ -250,8 +250,8 @@ class Client:
             conn_db.chiudi_connessione()
 
             #calcolo del nuumero di parti totali da scaricare
-            nParts = sharedFile.lenfile // sharedFile.lenpart
-            if sharedFile.lenfile % sharedFile.lenpart != 0:
+            nParts = int(sharedFile.lenfile) // int(sharedFile.lenpart)
+            if int(sharedFile.lenfile) % int(sharedFile.lenpart) != 0:
                 nParts = nParts + 1   
             
             while len(sharedParts) < nParts:               
