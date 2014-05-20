@@ -306,7 +306,7 @@ class Client:
                     #il padre inserisce la parte sulla tabella SharedPart lasciando vuoto il campo dedicato ai dati
                     #che sara' riempito dal figlio
                     conn_db = Connessione.Connessione()
-                    sharedPart = SharedPartService.SharedPartService.insertNewSharedPart(conn_db.crea_cursore(), downloadpartid, None, sharedFile.randomid)
+                    sharedPart = SharedPartService.SharedPartService.insertNewSharedPart(conn_db.crea_cursore(), downloadpartid, "", sharedFile.randomid)
                     conn_db.esegui_commit()
                     conn_db.chiudi_connessione()
                     
