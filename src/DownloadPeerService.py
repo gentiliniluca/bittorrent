@@ -40,7 +40,7 @@ class DownloadPeerService:
                             downloadpartid)
         
         downloadpeerid, ipp2p, pp2p = database.fetchone()
-        downloadPeer = DownloadPeer.DownloadPeer(dowanladpeerid, ipp2p, pp2p)
+        downloadPeer = DownloadPeer.DownloadPeer(downloadpeerid, ipp2p, pp2p)
         
         return downloadPeer
      

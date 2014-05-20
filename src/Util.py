@@ -5,9 +5,9 @@ import random
 class Util:
     
     global HOST
-    HOST   =  "fd00:0000:0000:0000:641f:15bd:d9be:ea0c"
+    HOST   =  "fd00:0000:0000:0000:6127:952a:fcbd:3f1f"
     global PORT
-    PORT = 8000
+    PORT = 3333
     
     global IPTracker
     IPTracker="fd00:0000:0000:0000:641f:15bd:d9be:ea0c"
@@ -16,10 +16,10 @@ class Util:
     PORTTracker= 8000
     
     global USERNAME
-    USERNAME = "root"
+    USERNAME = "p2pAdmin"
     
     global PASSWORD
-    PASSWORD = "lucaluca"
+    PASSWORD = "p2pAdmin"
     
 
     global SLEEPTIME
@@ -36,7 +36,7 @@ class Util:
     
     
     global LOCAL_PATH #percorso file condivisi
-    LOCAL_PATH = "/home/luca/Desktop/bittorrent/src/FileCondivisi/"
+    LOCAL_PATH = "/home/davide/Immagini/"
     
     @staticmethod
     def adattaStringa(lunghezzaFinale, stringa):

@@ -1,4 +1,4 @@
-class PrallelDownload:
+class ParallelDownload:
     
     def __init__(self, paralleldownloadid, number):
         self.paralleldownloadid = paralleldownloadid

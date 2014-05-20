@@ -3,7 +3,7 @@ import ParallelDownload
 class ParallelDownloadService:
     
     @staticmethod
-    def insertNewParallelDownload(database, ipp2p, pp2p):
+    def insertNewParallelDownload(database):
         parallelDownload = ParallelDownload.ParallelDownload(0, 0)
         
         try:

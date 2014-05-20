@@ -48,6 +48,6 @@ class DownloadPartService:
                             GROUP BY downloadpartid
                             ORDER BY counter""", randomid)
         
-        partid, = database.fetchone()
+        partid, count = database.fetchone()
         
         return partid
