@@ -518,7 +518,6 @@ class Client:
                 conn_db.esegui_commit()
                 conn_db.chiudi_connessione()
                 
-                print("\t\tinserito download peer")
                 #parte calcolo numero di parti ed elaborazione partlist
                 numparti=int(serachResultTrue.lenfile)//int(serachResultTrue.lenpart)
                 if(int(serachResultTrue.lenfile) % int(serachResultTrue.lenpart)!=0):
@@ -532,10 +531,7 @@ class Client:
                 part_list=sock.recv(numparti_byte)
                 part_list_bit=bitarray.bitarray(endian='big')
                 part_list_bit.frombytes(part_list)
-               
-
-                print("\t\tnum part binario:"+str(numparti_byte)+"   part list:"+str(part_list))
-                
+                               
                 j=0
                 while(j<numparti):
                     if(part_list_bit[j]==1):
@@ -543,7 +539,6 @@ class Client:
                         downloadpart=DownloadPartService.DownloadPartService.insertNewDownloadPart(conn_db.crea_cursore(), j, downloadpeer.downloadpeerid )
                         conn_db.esegui_commit()
                         conn_db.chiudi_connessione()
-                        print("\t\t inserito parte db")
                     j=j+1
                 
                 i=i+1
