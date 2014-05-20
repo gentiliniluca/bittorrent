@@ -1,0 +1,158 @@
+SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
+SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
+SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='TRADITIONAL,ALLOW_INVALID_DATES';
+
+CREATE SCHEMA IF NOT EXISTS `BitTorrent` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci ;
+USE `BitTorrent` ;
+
+-- -----------------------------------------------------
+-- Table `BitTorrent`.`Peer`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `BitTorrent`.`Peer` ;
+
+CREATE  TABLE IF NOT EXISTS `BitTorrent`.`Peer` (
+  `sessionid` CHAR(16) NOT NULL ,
+  `ipp2p` CHAR(39) NOT NULL ,
+  `pp2p` CHAR(5) NOT NULL ,
+  PRIMARY KEY (`sessionid`) )
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `BitTorrent`.`File`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `BitTorrent`.`File` ;
+
+CREATE  TABLE IF NOT EXISTS `BitTorrent`.`File` (
+  `randomid` CHAR(16) NOT NULL ,
+  `lenfile` CHAR(10) NOT NULL ,
+  `lenpart` CHAR(6) NOT NULL ,
+  `filename` CHAR(100) NOT NULL ,
+  PRIMARY KEY (`randomid`) )
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `BitTorrent`.`Part`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `BitTorrent`.`Part` ;
+
+CREATE  TABLE IF NOT EXISTS `BitTorrent`.`Part` (
+  `Peer_sessionid` CHAR(16) NOT NULL ,
+  `File_randomid` CHAR(16) NOT NULL ,
+  `partid` INT NOT NULL ,
+  PRIMARY KEY (`Peer_sessionid`, `File_randomid`, `partid`) ,
+  INDEX `fk_Peer_has_File_File1_idx` (`File_randomid` ASC) ,
+  INDEX `fk_Peer_has_File_Peer_idx` (`Peer_sessionid` ASC) ,
+  CONSTRAINT `fk_Peer_has_File_Peer`
+    FOREIGN KEY (`Peer_sessionid` )
+    REFERENCES `BitTorrent`.`Peer` (`sessionid` )
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_Peer_has_File_File1`
+    FOREIGN KEY (`File_randomid` )
+    REFERENCES `BitTorrent`.`File` (`randomid` )
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `BitTorrent`.`SharedFile`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `BitTorrent`.`SharedFile` ;
+
+CREATE  TABLE IF NOT EXISTS `BitTorrent`.`SharedFile` (
+  `randomid` CHAR(16) NOT NULL ,
+  `filename` CHAR(100) NOT NULL ,
+  `lenfile` CHAR(10) NOT NULL ,
+  `lenpart` CHAR(6) NOT NULL ,
+  PRIMARY KEY (`randomid`) )
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `BitTorrent`.`SharedPart`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `BitTorrent`.`SharedPart` ;
+
+CREATE  TABLE IF NOT EXISTS `BitTorrent`.`SharedPart` (
+  `partid` INT NOT NULL ,
+  `data` MEDIUMBLOB NULL ,
+  `SharedFile_randomid` CHAR(16) NOT NULL ,
+  PRIMARY KEY (`SharedFile_randomid`, `partid`) ,
+  INDEX `fk_Download_SharedFile1_idx` (`SharedFile_randomid` ASC) ,
+  CONSTRAINT `fk_Download_SharedFile1`
+    FOREIGN KEY (`SharedFile_randomid` )
+    REFERENCES `BitTorrent`.`SharedFile` (`randomid` )
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `BitTorrent`.`SearchResult`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `BitTorrent`.`SearchResult` ;
+
+CREATE  TABLE IF NOT EXISTS `BitTorrent`.`SearchResult` (
+  `idsearchresult` INT NOT NULL AUTO_INCREMENT ,
+  `randomid` CHAR(16) NOT NULL ,
+  `filename` CHAR(100) NOT NULL ,
+  `lenfile` CHAR(10) NOT NULL ,
+  `lenpart` CHAR(6) NOT NULL ,
+  `choose` CHAR(1) NOT NULL DEFAULT 'F' ,
+  PRIMARY KEY (`idsearchresult`) ,
+  UNIQUE INDEX `randomid_UNIQUE` (`randomid` ASC) )
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `BitTorrent`.`DownloadPeer`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `BitTorrent`.`DownloadPeer` ;
+
+CREATE  TABLE IF NOT EXISTS `BitTorrent`.`DownloadPeer` (
+  `downloadpeerid` INT NOT NULL AUTO_INCREMENT ,
+  `ipp2p` CHAR(39) NOT NULL ,
+  `pp2p` CHAR(5) NOT NULL ,
+  PRIMARY KEY (`downloadpeerid`) )
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `BitTorrent`.`DownloadPart`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `BitTorrent`.`DownloadPart` ;
+
+CREATE  TABLE IF NOT EXISTS `BitTorrent`.`DownloadPart` (
+  `downloadpartid` INT NOT NULL ,
+  `DownloadPeer_downloadpeerid` INT NOT NULL ,
+  PRIMARY KEY (`downloadpartid`, `DownloadPeer_downloadpeerid`) ,
+  INDEX `fk_DownloadPart_DownloadPeer1_idx` (`DownloadPeer_downloadpeerid` ASC) ,
+  CONSTRAINT `fk_DownloadPart_DownloadPeer1`
+    FOREIGN KEY (`DownloadPeer_downloadpeerid` )
+    REFERENCES `BitTorrent`.`DownloadPeer` (`downloadpeerid` )
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `BitTorrent`.`ParallelDownload`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `BitTorrent`.`ParallelDownload` ;
+
+CREATE  TABLE IF NOT EXISTS `BitTorrent`.`ParallelDownload` (
+  `paralleldownloadid` INT NOT NULL AUTO_INCREMENT ,
+  `number` INT NOT NULL DEFAULT 0 ,
+  PRIMARY KEY (`paralleldownloadid`) )
+ENGINE = InnoDB;
+
+USE `BitTorrent` ;
+
+
+SET SQL_MODE=@OLD_SQL_MODE;
+SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
+SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
+
