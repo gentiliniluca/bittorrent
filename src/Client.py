@@ -278,7 +278,7 @@ class Client:
                 conn_db.esegui_commit()
                 conn_db.chiudi_connessione()
                 
-                #se il numero di download paralleli attivi è inferiore al numero massimo si genera un processo figlio
+                #se il numero di download paralleli attivi e' inferiore al numero massimo si genera un processo figlio
                 #che si occupa dello scaricamento 
                 conn_db = Connessione.Connessione()
                 parallelDownload = ParallelDownloadService.ParallelDownloadService.getParallelDownload(conn_db.crea_cursore())
@@ -288,7 +288,7 @@ class Client:
                 if parallelDownload.number < Util.PARALLELDOWNLOADS:
                     
                     #il padre inserisce la parte sulla tabella SharedPart lasciando vuoto il campo dedicato ai dati
-                    #che sarà riempito dal figlio
+                    #che sara' riempito dal figlio
                     conn_db = Connessione.Connessione()
                     sharedPart = SharedPartService.SharedPartService.insertNewSharedPart(conn_db.crea_cursore(), downloadpartid, None, sharedFile.randomid)
                     conn_db.esegui_commit()
@@ -304,7 +304,7 @@ class Client:
                         conn_db.esegui_commit()
                         conn_db.chiudi_connessione()                    
                         
-                        #si connette al peer da cui scaricherà la parte    
+                        #si connette al peer da cui scarichera' la parte    
                         sock = socket.socket(socket.AF_INET6, socket.SOCK_STREAM) 
                         sock.connect((downloadPeer.ipp2p, int(downloadPeer.pp2p)))
                         sendingString = "RETP" + searchResults[choice - 1].randomid + Util.adattaStringa(8, downloadpartid)
@@ -389,7 +389,7 @@ class Client:
                         os._exit(0)
                     
                     else:
-                        #si aggiorna il numero di parti finora scaricate e si ripete il ciclo finchè non si sono scaricate tutte                       
+                        #si aggiorna il numero di parti finora scaricate e si ripete il ciclo finche' non si sono scaricate tutte                       
                         conn_db = Connessione.Connessione()
                         sharedParts = SharedPartService.SharedPartService.getSharedParts(conn_db.crea_cursore(), sharedFile.randomid)
                         conn_db.esegui_commit()
@@ -512,7 +512,7 @@ class Client:
             file.close()
             
             #termina la procedura: si toglie il marcatore che serviva per l'aggiornamento dello stato delle parti
-            #perchè non serve più
+            #perche' non serve piu'
             conn_db = Connessione.Connessione()
             SearchResultService.SearchResultService.unsetDownloadSearchResult(conn_db.crea_cursore())
             conn_db.esegui_commit()
