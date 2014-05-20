@@ -127,7 +127,7 @@ class Client:
                 
         except Exception as e:
             print e
-            print("Errore aggiunta file")
+            print("Errore aggiunta file (il nome e' corretto??)")
         
         
         #formatto e invio stringa di aggiunta file al tracker    
@@ -143,7 +143,7 @@ class Client:
             sock.close()
         except Exception as e:
             print e
-            print("Errore per contattare il superpeer in add file")
+            print("Errore per contattare il traker in add file")
     
     @staticmethod 
     def searchFile(SessionID):
