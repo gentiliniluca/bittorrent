@@ -15,7 +15,7 @@ class DownloadPeerService:
                             WHERE downloadpeerid = %s""",
                             downloadpeerid)
         downloadpeerid, ipp2p, pp2p = database.fetchone()
-        downloadPeer = DownalodPeer.DownloadPeer(dowanladpeerid, ipp2p, pp2p)
+        downloadPeer = DownloadPeer.DownloadPeer(dowanladpeerid, ipp2p, pp2p)
         return downloadPeer
     
     @staticmethod
@@ -25,7 +25,8 @@ class DownloadPeerService:
                             WHERE ipp2p = %s AND pp2p = %s""",
                             (ipp2p,pp2p))
         downloadpeerid, ipp2p, pp2p = database.fetchone()
-        downloadPeer = DownalodPeer.DownloadPeer(dowanladpeerid, ipp2p, pp2p)
+        downloadPeer = DownloadPeer.DownloadPeer(downloadpeerid, ipp2p, pp2p)
+        #print("* "+str(downloadPeer.downloadpeerid))
         return downloadPeer
     
     @staticmethod
@@ -39,7 +40,7 @@ class DownloadPeerService:
                             downloadpartid)
         
         downloadpeerid, ipp2p, pp2p = database.fetchone()
-        downloadPeer = DownalodPeer.DownloadPeer(dowanladpeerid, ipp2p, pp2p)
+        downloadPeer = DownloadPeer.DownloadPeer(dowanladpeerid, ipp2p, pp2p)
         
         return downloadPeer
      

@@ -128,7 +128,7 @@ class Client:
                 
         except Exception as e:
             print e
-            print("Errore aggiunta file")
+            print("Errore aggiunta file (il nome e' corretto??)")
         
         
         #formatto e invio stringa di aggiunta file al tracker    
@@ -144,7 +144,7 @@ class Client:
             sock.close()
         except Exception as e:
             print e
-            print("Errore per contattare il superpeer in add file")
+            print("Errore per contattare il traker in add file")
     
     @staticmethod 
     def searchFile(SessionID):
@@ -554,6 +554,14 @@ class Client:
             hitpeer = sock.recv(3)
             i=0
             
+            #pulizia db DownloadPeer DownloadPart
+            conn_db=Connessione.Connessione()
+            DownloadPartService.DownloadPartService.deleteParts(conn_db.crea_cursore())
+            DownloadPeerService.DownloadPeerService.deleteDownloadPeer(conn_db.crea_cursore())
+            conn_db.esegui_commit()
+            conn_db.chiudi_connessione()
+            
+            
             while(i<int(hitpeer)):
                 ipp2p=sock.recv(39)
                 pp2p=sock.recv(5)
@@ -572,7 +580,6 @@ class Client:
                 conn_db.esegui_commit()
                 conn_db.chiudi_connessione()
                 
-                print("\t\tinserito download peer")
                 #parte calcolo numero di parti ed elaborazione partlist
                 numparti=int(serachResultTrue.lenfile)//int(serachResultTrue.lenpart)
                 if(int(serachResultTrue.lenfile) % int(serachResultTrue.lenpart)!=0):
@@ -586,10 +593,7 @@ class Client:
                 part_list=sock.recv(numparti_byte)
                 part_list_bit=bitarray.bitarray(endian='big')
                 part_list_bit.frombytes(part_list)
-               
-
-                print("\t\tnum part binario:"+str(numparti_byte)+"   part list:"+str(part_list))
-                
+                               
                 j=0
                 while(j<numparti):
                     if(part_list_bit[j]==1):
@@ -597,12 +601,11 @@ class Client:
                         downloadpart=DownloadPartService.DownloadPartService.insertNewDownloadPart(conn_db.crea_cursore(), j, downloadpeer.downloadpeerid )
                         conn_db.esegui_commit()
                         conn_db.chiudi_connessione()
-                        print("\t\t inserito parte db")
                     j=j+1
                 
                 i=i+1
             sock.close()
-            
+            print("Aggiornata lista download")
         except Exception as e:
             print(e)
             print("non ci sono download in corso")

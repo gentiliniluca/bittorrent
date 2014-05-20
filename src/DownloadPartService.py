@@ -36,7 +36,7 @@ class DownloadPartService:
      
     @staticmethod
     def deleteParts(database):
-        database.execute("""DELETE FROM Part""")
+        database.execute("""DELETE FROM DownloadPart""")
         
     @staticmethod
     def getRandomPart(database, randomid):  
