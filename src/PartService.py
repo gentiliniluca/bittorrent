@@ -44,6 +44,26 @@ class PartService:
         return parts
     
     @staticmethod
+    def getPartsDown(database, sessionid):
+        database.execute("""SELECT DISTINCT File_randomid, partid
+                            FROM Part
+                            WHERE Peer_sessionid != %s AND File_randomid IN (SELECT DISTINCT File_randomid
+                                                                             FROM Part
+                                                                             WHERE Peer_sessionid = %s)""",
+                             (sessionid, sessionid))
+        parts = []
+        
+        while True:
+            try:
+                randomid, partid = database.fetchone()
+                part = Part.Part(None, randomid, partid)
+                parts.append(part)
+            except:
+                pass
+        
+        return parts
+    
+    @staticmethod
     def getPartCount(database, randomid, partid):
         database.execute("""SELECT count(*)
                             FROM Part

@@ -17,6 +17,7 @@ import FileService
 
 from signal import signal, SIGPIPE, SIG_DFL
 from os.path import stat
+from debian.debfile import PART_EXTS
 signal(SIGPIPE, SIG_DFL)
 
 class Server:
@@ -112,7 +113,12 @@ class Server:
                 conn_db.chiudi_connessione()    
 
             else:
-                sendingString="NLOG"+Util.Util.adattaStringa(10,str(len(parts)))
+                conn_db = Connessione.Connessione()
+                partdown = len(PartService.PartService.getPartsDown(conn_db.crea_cursore(), sessionID))
+                conn_db.esegui_commit()
+                conn_db.chiudi_connessione() 
+                
+                sendingString="NLOG"+Util.Util.adattaStringa(10,str(partdown))                
 
             print("\t\t\t\t\t\t\t->Restituisco: " + sendingString)
             clientSocket.send(sendingString)
