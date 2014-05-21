@@ -424,6 +424,20 @@ class Client:
                 conn_db.esegui_commit()
                 conn_db.chiudi_connessione()
                 
+            #termina la procedura: si toglie il marcatore che serviva per l'aggiornamento dello stato delle parti
+            #perche' non serve piu'
+            conn_db = Connessione.Connessione()
+            SearchResultService.SearchResultService.unsetDownloadSearchResult(conn_db.crea_cursore())
+            conn_db.esegui_commit()
+            conn_db.chiudi_connessione()
+            
+            #pulizia db DownloadPeer DownloadPart
+            conn_db = Connessione.Connessione()
+            DownloadPartService.DownloadPartService.deleteParts(conn_db.crea_cursore())
+            DownloadPeerService.DownloadPeerService.deleteDownloadPeer(conn_db.crea_cursore())
+            conn_db.esegui_commit()
+            conn_db.chiudi_connessione()
+                
             #si hanno ora tutte le parti del file: si recuperano i dati di ciascuna di esse dal db e si scrive tutto su file
             conn_db = Connessione.Connessione()
             sharedParts = SharedPartService.SharedPartService.getSharedParts(conn_db.crea_cursore(), searchResults[choice - 1].randomid)
@@ -437,23 +451,7 @@ class Client:
                 file.write(sharedParts[i].data)                
                 i = i + 1
             
-            file.close()
-            
-            #termina la procedura: si toglie il marcatore che serviva per l'aggiornamento dello stato delle parti
-            #perche' non serve piu'
-            conn_db = Connessione.Connessione()
-            SearchResultService.SearchResultService.unsetDownloadSearchResult(conn_db.crea_cursore())
-            conn_db.esegui_commit()
-            conn_db.chiudi_connessione()
-            
-            #pulizia db DownloadPeer DownloadPart
-            conn_db=Connessione.Connessione()
-            DownloadPartService.DownloadPartService.deleteParts(conn_db.crea_cursore())
-            DownloadPeerService.DownloadPeerService.deleteDownloadPeer(conn_db.crea_cursore())
-            conn_db.esegui_commit()
-            conn_db.chiudi_connessione()
-            
-            
+            file.close()            
             
             #controllo correttezza del download verificando la lunghezza del file
 #            lenfile = os.path.getsize(Util.LOCAL_PATH + sharedFile.filename)      
