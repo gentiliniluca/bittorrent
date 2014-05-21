@@ -251,7 +251,7 @@ class Client:
             conn_db = Connessione.Connessione()
             sharedFile = SharedFileService.SharedFileService.insertNewSharedFile(conn_db.crea_cursore(), searchResults[choice - 1].randomid, searchResults[choice - 1].filename, searchResults[choice - 1].lenfile, searchResults[choice - 1].lenpart)
             conn_db.esegui_commit()
-            conn_db.chiudi_connessione()
+            conn_db.chiudi_connessione()     
             
 #            conn_db = Connessione.Connessione()
 #            counts = DownloadPartService.DownloadPartService.getPartCount(conn_db.crea_cursore())
@@ -380,14 +380,14 @@ class Client:
                             #notifica al tracker del completamento del download della parte
                             sock = socket.socket(socket.AF_INET6, socket.SOCK_STREAM) 
                             sock.connect((Util.IPTracker, int(Util.PORTTracker)))
-                            sendingString = "RPAD" + sessionid + searchResults[choice - 1].randomid + Util.Util.adattaStringa(8, downloadpartid)  
+                            sendingString = "RPAD" + sessionid + searchResults[choice - 1].randomid + Util.Util.adattaStringa(8, str(downloadpartid))  
                             sock.send(sendingString)
                             
                             receivedString = sock.recv(12)
                             if receivedString[0:4] == "APAD":
                                 numPart = receivedString[4:12]
-                                print "Numero di parti condivise sulla rete: " + numPart 
-                        
+                                print "Numero di parti condivise sulla rete: " + numPart                            
+                            
                         else:
                             #nel caso in cui il download non vada a buon fine si elimina la parte 
                             #precedentemente inserita sul db
@@ -513,17 +513,29 @@ class Client:
 #                
 #               i = i + 1
             
+            conn_db = Connessione.Connessione()
+            parallelDownload = ParallelDownloadService.ParallelDownloadService.getParallelDownload(conn_db.crea_cursore())
+            conn_db.esegui_commit()
+            conn_db.chiudi_connessione()
+            while int(parallelDownload.number) > 0:
+                print "-------> parallelDownloads" + str(parallelDownload.number)
+                time.sleep(1)
+                conn_db = Connessione.Connessione()
+                parallelDownload = ParallelDownloadService.ParallelDownloadService.getParallelDownload(conn_db.crea_cursore())
+                conn_db.esegui_commit()
+                conn_db.chiudi_connessione()
+                
             #si hanno ora tutte le parti del file: si recuperano i dati di ciascuna di esse dal db e si scrive tutto su file
             conn_db = Connessione.Connessione()
-            sharedParts = SharedPartService.SharedPartService.getSharedParts(conn_db.crea_cursore(), sharedFile.randomid)
+            sharedParts = SharedPartService.SharedPartService.getSharedParts(conn_db.crea_cursore(), searchResults[choice - 1].randomid)
             conn_db.esegui_commit()
             conn_db.chiudi_connessione()
             
-            file = open(Util.LOCAL_PATH + sharedFile.filename, "wb")
+            file = open(Util.LOCAL_PATH + searchResults[choice - 1].filename, "wb")
             
             i = 0
             while i < len(sharedParts):
-                file.write(sharedParts[i].data)
+                file.write(sharedParts[i].data)                
                 i = i + 1
             
             file.close()
