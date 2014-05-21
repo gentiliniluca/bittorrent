@@ -5,13 +5,14 @@ import random
 class Util:
     
     global HOST
-    HOST   =  "fd00:0000:0000:0000:6127:952a:fcbd:3f1f"
+    HOST   =  "fd00:0000:0000:0000:ddf5:8932:b5eb:e39c"
     global PORT
     PORT = 3333
     
     global IPTracker
-    IPTracker="fd00:0000:0000:0000:641f:15bd:d9be:ea0c"
- 
+    IPTracker="fd00:0000:0000:0000:994e:ea1e:9c37:3304"
+    #PTracker="fd00:0000:0000:0000:fdae:24e4:e9be:36d1"
+    
     global PORTTracker
     PORTTracker= 8000
     
@@ -32,7 +33,7 @@ class Util:
     LENPART = 262144  #in byte
         
     global PARALLELDOWNLOADS
-    PARALLELDOWNLOADS = 20
+    PARALLELDOWNLOADS = 3
     
     
     global LOCAL_PATH #percorso file condivisi
