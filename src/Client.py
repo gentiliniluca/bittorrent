@@ -413,16 +413,31 @@ class Client:
                         conn_db.esegui_commit()
                         conn_db.chiudi_connessione()                                             
                   
-            conn_db = Connessione.Connessione()
-            parallelDownload = ParallelDownloadService.ParallelDownloadService.getParallelDownload(conn_db.crea_cursore())
-            conn_db.esegui_commit()
-            conn_db.chiudi_connessione()
-            while int(parallelDownload.number) > 0:
-                time.sleep(1)
+#            conn_db = Connessione.Connessione()
+#            parallelDownload = ParallelDownloadService.ParallelDownloadService.getParallelDownload(conn_db.crea_cursore())
+#            conn_db.esegui_commit()
+#            conn_db.chiudi_connessione()
+#            while int(parallelDownload.number) > 0:
+#                time.sleep(1)
+#                conn_db = Connessione.Connessione()
+#                parallelDownload = ParallelDownloadService.ParallelDownloadService.getParallelDownload(conn_db.crea_cursore())
+#                conn_db.esegui_commit()
+#                conn_db.chiudi_connessione()
+            
+            downloading = True
+            while downloading:
                 conn_db = Connessione.Connessione()
-                parallelDownload = ParallelDownloadService.ParallelDownloadService.getParallelDownload(conn_db.crea_cursore())
+                sharedParts = SharedPartService.SharedPartService.getSharedParts(conn_db.crea_cursore(), sharedFile.randomid)
                 conn_db.esegui_commit()
                 conn_db.chiudi_connessione()
+                
+                downloading = False
+                i = 0
+                while i < len(sharedParts):
+                    if sharedParts[i].data == "":
+                        downloading = True
+                    i = i + 1
+
                 
             #termina la procedura: si toglie il marcatore che serviva per l'aggiornamento dello stato delle parti
             #perche' non serve piu'
