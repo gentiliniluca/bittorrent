@@ -5,23 +5,23 @@ import random
 class Util:
     
     global HOST
-    HOST   =  "fd00:0000:0000:0000:ddf5:8932:b5eb:e39c"
+    HOST   =  "fd00:0000:0000:0000:7dea:61fd:0c8a:3069"
 
     global PORT
-    PORT = 3331
+    PORT = 3333
     
     global IPTracker
-    IPTracker="fd00:0000:0000:0000:994e:ea1e:9c37:3304"
-    #PTracker="fd00:0000:0000:0000:fdae:24e4:e9be:36d1"
+    IPTracker="fd00:0000:0000:0000:4807:b52f:a451:3bae"
+    #IPTracker="fd00:0000:0000:0000:fdae:24e4:e9be:36d1"
     
     global PORTTracker
     PORTTracker= 8000
     
     global USERNAME
-    USERNAME = "root"
+    USERNAME = "p2pAdmin"
     
     global PASSWORD
-    PASSWORD = "lucaluca"
+    PASSWORD = "p2pAdmin"
     
     global SLEEPTIME
     SLEEPTIME = 10
@@ -36,7 +36,7 @@ class Util:
     PARALLELDOWNLOADS = 5
     
     global LOCAL_PATH #percorso file condivisi
-    LOCAL_PATH = "/home/luca/Desktop/bittorrent/src/FileCondivisi/"
+    LOCAL_PATH = "/home/davide/Immagini/"
     
     @staticmethod
     def adattaStringa(lunghezzaFinale, stringa):
