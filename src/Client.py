@@ -287,7 +287,7 @@ class Client:
                         #si attende un secondo e si ritenta la lettura
                         print ".",
                         time.sleep(1)
-                print ""
+#                print ""
                 
                 #recupero le informazioni del peer da cui scaricare
                 conn_db = Connessione.Connessione()
@@ -325,7 +325,6 @@ class Client:
                         #si connette al peer da cui scarichera' la parte    
                         sock = socket.socket(socket.AF_INET6, socket.SOCK_STREAM) 
                         sock.connect((downloadPeer.ipp2p, int(downloadPeer.pp2p)))
-                        print downloadpartid
                         sendingString = "RETP" + searchResults[choice - 1].randomid + Util.Util.adattaStringa(8, str(downloadpartid))
                         #sock.send(sendingString.encode())
                         sock.send(sendingString)
@@ -340,7 +339,7 @@ class Client:
                             
                             #inizializzo la variabile temporanea per stampre la percentuale
                             tmp = -1
-                            print "\nDownloading part: " + str(downloadpartid + 1) + "...\t",
+                            print "\nDownloading part " + str(downloadpartid + 1) + "\t",
                             
                             while chunkCounter < nChunk:
                                 receivedString = sock.recv(1024)
