@@ -20,7 +20,6 @@ class Util:
     global PASSWORD
     PASSWORD = "lucaluca"
     
-
     global SLEEPTIME
     SLEEPTIME = 10
 
@@ -32,8 +31,7 @@ class Util:
         
     global PARALLELDOWNLOADS
     PARALLELDOWNLOADS = 5
-    
-    
+     
     global LOCAL_PATH #percorso file condivisi
     LOCAL_PATH = "/home/luca/Desktop/bittorrent/src/FileCondivisi/"
     
