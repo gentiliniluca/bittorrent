@@ -12,7 +12,6 @@ class Util:
     
     global IPTracker
     IPTracker="fd00:0000:0000:0000:994e:ea1e:9c37:3304"
-    #PTracker="fd00:0000:0000:0000:fdae:24e4:e9be:36d1"
     
     global PORTTracker
     PORTTracker= 8000
