@@ -267,7 +267,9 @@ class Client:
             #calcolo del nuumero di parti totali da scaricare
             nParts = int(sharedFile.lenfile) // int(sharedFile.lenpart)
             if int(sharedFile.lenfile) % int(sharedFile.lenpart) != 0:
-                nParts = nParts + 1   
+                nParts = nParts + 1  
+                
+            print "-----> Numero parti: " + str(nParts) 
             
             while len(sharedParts) < nParts:               
                 print "In attesa di risultati ",
@@ -281,7 +283,7 @@ class Client:
                         conn_db.chiudi_connessione()
                         presence = True
                     except:
-                        print sys.exc_info()
+                        #print sys.exc_info()
                         #se il processo di aggiornamento dello stato delle parti non ha ancora prodotto risultati
                         #si attende un secondo e si ritenta la lettura
                         print ".",
@@ -303,6 +305,12 @@ class Client:
                 
                 if parallelDownload.number < Util.PARALLELDOWNLOADS:
                     
+                    #incrementa il numero di download paralleli attivi
+                    conn_db = Connessione.Connessione()
+                    ParallelDownloadService.ParallelDownloadService.increase(conn_db.crea_cursore())
+                    conn_db.esegui_commit()
+                    conn_db.chiudi_connessione()
+                      
                     #il padre inserisce la parte sulla tabella SharedPart lasciando vuoto il campo dedicato ai dati
                     #che sara' riempito dal figlio
                     conn_db = Connessione.Connessione()
@@ -313,18 +321,14 @@ class Client:
                     newpid = os.fork()
                     
                     #processo figlio per download
-                    if newpid == 0:
-                        #incrementa il numero di download paralleli attivi
-                        conn_db = Connessione.Connessione()
-                        ParallelDownloadService.ParallelDownloadService.increase(conn_db.crea_cursore())
-                        conn_db.esegui_commit()
-                        conn_db.chiudi_connessione()                    
+                    if newpid == 0:                                         
                         
                         #si connette al peer da cui scarichera' la parte    
                         sock = socket.socket(socket.AF_INET6, socket.SOCK_STREAM) 
                         sock.connect((downloadPeer.ipp2p, int(downloadPeer.pp2p)))
                         print downloadpartid
                         sendingString = "RETP" + searchResults[choice - 1].randomid + Util.Util.adattaStringa(8, str(downloadpartid))
+                        print "------> sending string: " + sendingString
                         #sock.send(sendingString.encode())
                         sock.send(sendingString)
                         
@@ -402,6 +406,7 @@ class Client:
                         ParallelDownloadService.ParallelDownloadService.decrease(conn_db.crea_cursore())
                         conn_db.esegui_commit()
                         conn_db.chiudi_connessione()
+                        print "------> Scaricamento parte " + str(downloadpartid) + " decrementa contatore"
                         
                         os._exit(0)
                     
@@ -411,108 +416,7 @@ class Client:
                         sharedParts = SharedPartService.SharedPartService.getSharedParts(conn_db.crea_cursore(), sharedFile.randomid)
                         conn_db.esegui_commit()
                         conn_db.chiudi_connessione()                                             
-            
-#            i = 0
-#            while i < len(counts):
-#                j = 0
-#                while j < len(counts[i]):
-#                    conn_db = Connessione.Connessione()
-#                    parallelDownload = ParallelDownloadService.ParallelDownloadService.getParallelDownload(conn_db.crea_cursore())
-#                    conn_db.esegui_commit()
-#                    conn_db.chiudi_connessione()
-#                    
-#                    if parallelDownload.number < Util.PARALLELDOWNLOADS:
-#                        newpid = os.fork()
-#                    
-#                        if newpid == 0:
-#                            
-#                            conn_db = Connessione.Connessione()
-#                            ParallelDownloadService.ParallelDownloadService.increase(conn_db.crea_cursore())
-#                            conn_db.esegui_commit()
-#                            conn_db.chiudi_connessione()
-#                            
-#                            try:
-#                                conn_db = Connessione.Connessione()
-#                                sharedPart = SharedPartService.SharedPartService.getSharedPart(conn_db.crea_cursore(), searchResults[choice - 1].randomid, counts[i][j])
-#                                conn_db.esegui_commit()
-#                                conn_db.chiudi_connessione()
-#                                
-#                            except:
-#                                
-#                                conn_db = Connessione.Connessione()
-#                                downloadPeer = DownloadPeerService.DownloadPeerService.getDownloadPeer(conn_db.crea_cursore(), counts[i][j])
-#                               conn_db.esegui_commit()
-#                                conn_db.chiudi_connessione()
-#                               
-#                                sock = socket.socket(socket.AF_INET6, socket.SOCK_STREAM) 
-#                                sock.connect((downloadPeer.ipp2p, int(downloadPeer.pp2p)))
-#                                sendingString = "RETP" + searchResults[choice - 1].randomid + Util.adattaStringa(8, counts[i][j])
-#                                #sock.send(sendingString.encode())
-#                                sock.send(sendingString)
-#                                
-#                                receivedString = sock.recv(10)       
-#                                if receivedString[0:4].decode() == "AREP":
-#                                    nChunk = int(receivedString[4:10].decode())            
-#                                    chunk = bytes()
-#                                    chunkCounter = 0
-#                   
-#                                    #file = open(Util.LOCAL_PATH + searchResults[choice - 1].filename, "wb")
-#                                    sharedPart = SharedPart.SharedPart(counts[i][j], "", sharedFile.randomid)
-#                                    
-#                                    #inizializzo la variabile temporanea per stampre la percentuale
-#                                    tmp = -1
-#                                    print "\nDownloading...\t",
-#                                    
-#                                    while chunkCounter < nChunk:
-#                                        receivedString = sock.recv(1024)
-#                                        chunk = chunk + receivedString                
-#                    
-#                                        while True:
-#                                            
-#                                            #Un po' di piacere per gli occhi...
-#                                            perCent = chunkCounter*100//nChunk
-#                                            if(perCent % 10 == 0 and tmp != perCent):
-#                                                if(tmp != -1):
-#                                                    print " - ",
-#                                                print str(perCent) + "%",
-#                                                tmp = perCent
-#                                            
-#                                            if len(chunk[:5]) >=  5:
-#                                                chunkLength = int(chunk[:5])
-#                                            else:
-#                                                break
-#                    
-#                                            if len(chunk[5:]) >= chunkLength:
-#                                                data = chunk[5:5 + chunkLength]
-#                                                #file.write(data)
-#                                                sharedPart.data = sharedPart.data + data
-#                                                chunkCounter = chunkCounter + 1
-#                                                chunk = chunk[5 + chunkLength:]
-#                                            else:
-#                                                break
-#                    
-#                                    #file.close()
-#                                    conn_db = Connessione.Connessione()
-#                                    sharedPart.insert(conn_db.crea_cursore())
-#                                    conn_db.esegui_commit()
-#                                    conn_db.chiudi_connessione()
-#                                    print ""
-#                            
-#                            finally:
-#                                conn_db = Connessione.Connessione()
-#                                ParallelDownloadService.ParallelDownloadService.decrease(conn_db.crea_cursore())
-#                                conn_db.esegui_commit()
-#                                conn_db.chiudi_connessione()
-#                                
-#                                os._exit(0)
-#                        
-#                        else:
-#                            j = j + 1
-#                    
-#                    # Ipotizzare presenza wait
-#                
-#               i = i + 1
-            
+                  
             conn_db = Connessione.Connessione()
             parallelDownload = ParallelDownloadService.ParallelDownloadService.getParallelDownload(conn_db.crea_cursore())
             conn_db.esegui_commit()
@@ -544,6 +448,13 @@ class Client:
             #perche' non serve piu'
             conn_db = Connessione.Connessione()
             SearchResultService.SearchResultService.unsetDownloadSearchResult(conn_db.crea_cursore())
+            conn_db.esegui_commit()
+            conn_db.chiudi_connessione()
+            
+            #pulizia db DownloadPeer DownloadPart
+            conn_db=Connessione.Connessione()
+            DownloadPartService.DownloadPartService.deleteParts(conn_db.crea_cursore())
+            DownloadPeerService.DownloadPeerService.deleteDownloadPeer(conn_db.crea_cursore())
             conn_db.esegui_commit()
             conn_db.chiudi_connessione()
             

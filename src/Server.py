@@ -255,7 +255,7 @@ class Server:
     def downloadNotification(receivedString, clientSocket):
         sessionID=receivedString[4:20]
         randomID=receivedString[20:36]
-        partID=receivedString[36:42]
+        partID=receivedString[36:44]
 
         try:
             conn_db=Connessione.Connessione()
