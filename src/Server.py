@@ -248,7 +248,8 @@ class Server:
             print("\t\t\t\t\t\t\t->OK")
 
         except Exception as e:
-            print(e)
+            #print(e)
+            print("")
                 
     @staticmethod
     def downloadNotification(receivedString, clientSocket):
@@ -267,7 +268,7 @@ class Server:
             conn_db.esegui_commit()
             conn_db.chiudi_connessione()
 
-            sendingString="APAD"+Util.Util.adattaStringa(8,count)
+            sendingString="APAD"+Util.Util.adattaStringa(8,str(count))
             print("\t\t\t\t\t\t\t->Restituisco: " + sendingString)
             clientSocket.send(sendingString)
             print("\t\t\t\t\t\t\t->OK")
