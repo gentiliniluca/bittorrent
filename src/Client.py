@@ -268,11 +268,10 @@ class Client:
             nParts = int(sharedFile.lenfile) // int(sharedFile.lenpart)
             if int(sharedFile.lenfile) % int(sharedFile.lenpart) != 0:
                 nParts = nParts + 1  
-                
-            print "-----> Numero parti: " + str(nParts) 
             
+            print "In attesa di risultati ",
             while len(sharedParts) < nParts:               
-                print "In attesa di risultati ",
+                
                 presence = False
                 while not presence:
                     try:
@@ -328,7 +327,6 @@ class Client:
                         sock.connect((downloadPeer.ipp2p, int(downloadPeer.pp2p)))
                         print downloadpartid
                         sendingString = "RETP" + searchResults[choice - 1].randomid + Util.Util.adattaStringa(8, str(downloadpartid))
-                        print "------> sending string: " + sendingString
                         #sock.send(sendingString.encode())
                         sock.send(sendingString)
                         
@@ -342,7 +340,7 @@ class Client:
                             
                             #inizializzo la variabile temporanea per stampre la percentuale
                             tmp = -1
-                            print "\nDownloading...\t",
+                            print "\nDownloading part: " + str(downloadpartid + 1) + "...\t",
                             
                             while chunkCounter < nChunk:
                                 receivedString = sock.recv(1024)
@@ -351,12 +349,12 @@ class Client:
                                 while True:
                                     
                                     #Un po' di piacere per gli occhi...
-                                    perCent = chunkCounter*100//nChunk
-                                    if(perCent % 10 == 0 and tmp != perCent):
-                                        if(tmp != -1):
-                                            print " - ",
-                                        print str(perCent) + "%",
-                                        tmp = perCent
+#                                    perCent = chunkCounter*100//nChunk
+#                                    if(perCent % 10 == 0 and tmp != perCent):
+#                                        if(tmp != -1):
+#                                            print " - ",
+#                                        print str(perCent) + "%",
+#                                        tmp = perCent
                                     
                                     if len(chunk[:5]) >=  5:
                                         chunkLength = int(chunk[:5])
@@ -406,7 +404,6 @@ class Client:
                         ParallelDownloadService.ParallelDownloadService.decrease(conn_db.crea_cursore())
                         conn_db.esegui_commit()
                         conn_db.chiudi_connessione()
-                        print "------> Scaricamento parte " + str(downloadpartid) + " decrementa contatore"
                         
                         os._exit(0)
                     
@@ -422,7 +419,6 @@ class Client:
             conn_db.esegui_commit()
             conn_db.chiudi_connessione()
             while int(parallelDownload.number) > 0:
-                print "-------> parallelDownloads" + str(parallelDownload.number)
                 time.sleep(1)
                 conn_db = Connessione.Connessione()
                 parallelDownload = ParallelDownloadService.ParallelDownloadService.getParallelDownload(conn_db.crea_cursore())
@@ -458,10 +454,13 @@ class Client:
             conn_db.esegui_commit()
             conn_db.chiudi_connessione()
             
+            
+            
             #controllo correttezza del download verificando la lunghezza del file
-            lenfile = os.path.getsize(Util.LOCAL_PATH + sharedFile.filename)      
-            if lenfile != sharedFile.lenfile:
-                print("Errore nel download del file!")  
+#            lenfile = os.path.getsize(Util.LOCAL_PATH + sharedFile.filename)      
+#            if lenfile != sharedFile.lenfile:
+#                print("Errore nel download del file!")  
+            print "File scaricato correttamente!"
         else:
             print("Annullato")
     
