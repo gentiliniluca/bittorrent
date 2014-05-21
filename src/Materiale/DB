@@ -144,7 +144,7 @@ ENGINE = InnoDB;
 DROP TABLE IF EXISTS `BitTorrent`.`ParallelDownload` ;
 
 CREATE  TABLE IF NOT EXISTS `BitTorrent`.`ParallelDownload` (
-  `paralleldownloadid` INT NOT NULL AUTO_INCREMENT ,
+  `paralleldownloadid` INT NOT NULL ,
   `number` INT NOT NULL DEFAULT 0 ,
   PRIMARY KEY (`paralleldownloadid`) )
 ENGINE = InnoDB;
@@ -155,4 +155,3 @@ USE `BitTorrent` ;
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
-
