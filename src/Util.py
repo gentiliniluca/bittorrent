@@ -5,13 +5,13 @@ import random
 class Util:
     
     global HOST
-    HOST   =  "fd00:0000:0000:0000:7dea:61fd:0c8a:3069"
+    HOST   =  "fd00:0000:0000:0000:19a2:69e5:0c9b:1c38"
 
     global PORT
     PORT = 3333
     
     global IPTracker
-    IPTracker="fd00:0000:0000:0000:994e:ea1e:9c37:3304"
+    IPTracker="fd00:0000:0000:0000:d86c:5cc6:c2b0:aa80"
 
     
     global PORTTracker

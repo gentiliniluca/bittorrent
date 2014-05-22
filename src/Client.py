@@ -131,7 +131,7 @@ class Client:
                     break
                 else:
                     conn_db = Connessione.Connessione()
-                    part=SharedPartService.SharedPartService.insertNewSharedPart(conn_db.crea_cursore(), i, data, sharedfile.randomid)
+                    part=SharedPartService.SharedPartService.insertNewSharedPart(conn_db.crea_cursore(), i+1, data, sharedfile.randomid)
                     conn_db.esegui_commit()
                     conn_db.chiudi_connessione()
                 i= i + 1
@@ -339,7 +339,7 @@ class Client:
                             
                             #inizializzo la variabile temporanea per stampre la percentuale
                             tmp = -1
-                            print "\nDownloading part " + str(downloadpartid + 1) + "\t",
+                            print "\nDownloading part " + str(downloadpartid) + "\t",
                             
                             while chunkCounter < nChunk:
                                 receivedString = sock.recv(1024)
@@ -597,7 +597,7 @@ class Client:
                 while(j < numparti):
                     if(part_list_bit[j] == 1):
                         #conn_db = Connessione.Connessione()
-                        downloadpart = DownloadPartService.DownloadPartService.insertNewDownloadPart(conn_db.crea_cursore(), j, downloadpeer.downloadpeerid)
+                        downloadpart = DownloadPartService.DownloadPartService.insertNewDownloadPart(conn_db.crea_cursore(), j+1, downloadpeer.downloadpeerid)
                         #conn_db.esegui_commit()
                         #conn_db.chiudi_connessione()
                     j = j + 1

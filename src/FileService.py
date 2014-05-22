@@ -15,7 +15,7 @@ class FileService:
         
         i = 0
         while i < npart:
-            partid = i
+            partid = i + 1
             PartService.PartService.insertNewPart(database, sessionid, randomid, partid)
             i=i+1
     
